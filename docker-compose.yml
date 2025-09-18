@@ -1,0 +1,47 @@
+version: '3.8'
+services:
+  mysql-booking:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: booking
+    ports: ["3307:3306"]
+  mysql-inventory:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: inventory
+    ports: ["3308:3306"]
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports: ["9092:9092"]
+  booking-service:
+    build: ./booking-service
+    ports: ["8081:8080"]
+    depends_on: [ mysql-booking, redis, kafka ]
+  inventory-service:
+    build: ./inventory-service
+    ports: ["8082:8080"]
+    depends_on: [ mysql-inventory, kafka ]
+  eventing-service:
+    build: ./eventing-service
+    ports: ["8083:8080"]
+    depends_on: [ kafka ]
+  notification-service:
+    build: ./notification-service
+    ports: ["8084:8080"]
+    depends_on: [ kafka ]

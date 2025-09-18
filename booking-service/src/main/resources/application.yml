@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:mysql://mysql-booking:3306/booking?useSSL=false&serverTimezone=UTC
+    username: root
+    password: example
+  jpa:
+    hibernate:
+      ddl-auto: update
+redisson:
+  address: redis://redis:6379
+kafka:
+  bootstrap-servers: kafka:9092
+server:
+  port: 8080
+app:
+  hold-ttl-seconds: 300
