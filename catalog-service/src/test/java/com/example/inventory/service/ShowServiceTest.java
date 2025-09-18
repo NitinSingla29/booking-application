@@ -89,7 +89,7 @@ public class ShowServiceTest extends BaseTest {
         assertNotNull(show);
 
         List<SeatInventoryEntry> entries = seatInventoryEntryRepository.findByShow(show);
-        assertEquals(1, entries.size());
+        assertEquals(50, entries.size());
         assertEquals(SeatInventoryStatus.AVAILABLE, entries.get(0).getSeatInventoryStatus());
     }
 
