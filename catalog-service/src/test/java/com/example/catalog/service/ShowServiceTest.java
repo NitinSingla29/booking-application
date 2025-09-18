@@ -37,7 +37,7 @@ public class ShowServiceTest extends BaseTest {
     private Movie movie1, movie2;
     private Theatre theatre1, theatre2;
     private Screen screen1, screen2;
-    private SeatDefinition seatDef1, seatDef2;
+    private SeatLayoutDefinition seatDef1, seatDef2;
 
     @BeforeEach
     void setUp() {
@@ -66,8 +66,8 @@ public class ShowServiceTest extends BaseTest {
         screenRepository.save(screen1);
         screenRepository.save(screen2);
 
-        seatDef1 = screen1.getSeatDefinitions().get(0);
-        seatDef2 = screen2.getSeatDefinitions().get(0);
+        seatDef1 = screen1.getSeatLayoutDefinitions().get(0);
+        seatDef2 = screen2.getSeatLayoutDefinitions().get(0);
     }
 
 
@@ -188,15 +188,15 @@ public class ShowServiceTest extends BaseTest {
         screen.setName(name);
         screen.setTheatre(theatre);
 
-        List<SeatDefinition> seatDefs = new ArrayList<>();
+        List<SeatLayoutDefinition> seatDefs = new ArrayList<>();
         for (int row = 1; row <= 5; row++) {
             for (int col = 1; col <= 10; col++) {
                 SeatType seatType = (row == 1) ? SeatType.PREMIUM : SeatType.STANDARD;
-                SeatDefinition seat = new SeatDefinition(screen, name + "R" + row + "C" + col, seatType, row, col);
+                SeatLayoutDefinition seat = new SeatLayoutDefinition(screen, name + "R" + row + "C" + col, seatType, row, col);
                 seatDefs.add(seat);
             }
         }
-        screen.setSeatDefinitions(seatDefs);
+        screen.setSeatLayoutDefinitions(seatDefs);
         return screen;
     }
 

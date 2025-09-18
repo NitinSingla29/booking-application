@@ -41,11 +41,11 @@ public class ShowService {
         Show saved = showRepository.save(show);
 
         // If SCHEDULED, create SeatInventoryEntry for all seats in the screen
-        if (request.getShowStatus() == ShowStatus.SCHEDULED && screen != null && screen.getSeatDefinitions() != null) {
-            for (SeatDefinition seat : screen.getSeatDefinitions()) {
+        if (request.getShowStatus() == ShowStatus.SCHEDULED && screen != null && screen.getSeatLayoutDefinitions() != null) {
+            for (SeatLayoutDefinition seat : screen.getSeatLayoutDefinitions()) {
                 SeatInventoryEntry entry = new SeatInventoryEntry();
                 entry.setShow(saved);
-                entry.setSeatLayout(seat);
+                entry.setSeatLayoutDefinition(seat);
                 entry.setSeatInventoryStatus(SeatInventoryStatus.AVAILABLE);
                 seatInventoryEntryRepository.save(entry);
             }
@@ -143,8 +143,8 @@ public class ShowService {
 
     private static ShowSeatInventoryResponse.SeatInfo getSeatInfo(SeatInventoryEntry entry) {
         ShowSeatInventoryResponse.SeatInfo info = new ShowSeatInventoryResponse.SeatInfo();
-        info.setSeatSystemCode(entry.getSeatLayout().getSystemCode());
-        info.setSeatCode(entry.getSeatLayout().getSeatCode());
+        info.setSeatSystemCode(entry.getSeatLayoutDefinition().getSystemCode());
+        info.setSeatCode(entry.getSeatLayoutDefinition().getSeatCode());
         info.setSeatStatus(entry.getSeatInventoryStatus());
         return info;
     }

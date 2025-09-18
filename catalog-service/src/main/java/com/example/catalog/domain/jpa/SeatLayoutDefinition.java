@@ -12,13 +12,12 @@ import org.springframework.util.Assert;
 @Entity
 @Getter
 @Setter
-@Table(name = "seat_layout", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"screen_id", "seat_code"})})
+@Table(name = "seat_layout_definition")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class SeatDefinition extends SystemCodedRelationEntity {
+public class SeatLayoutDefinition extends SystemCodedRelationEntity {
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "screen_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "screen_id", nullable = false)
     private Screen screen;
 
     @Column(name = "seat_code")
@@ -34,7 +33,7 @@ public class SeatDefinition extends SystemCodedRelationEntity {
     @Column(name = "column_number")
     private int columnNumber;
 
-    public SeatDefinition(Screen screen, String seatCode, SeatType seatType, int rowNumber, int columnNumber) {
+    public SeatLayoutDefinition(Screen screen, String seatCode, SeatType seatType, int rowNumber, int columnNumber) {
         Assert.notNull(screen, "Argument [screen] must be present");
         this.screen = screen;
         this.seatCode = seatCode;

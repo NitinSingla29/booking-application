@@ -19,8 +19,8 @@ public class SeatInventoryEntry extends SystemCodedRelationEntity {
     private Show show;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "seat_layout_id")
-    private SeatDefinition seatLayout;
+    @JoinColumn(name = "seat_layout_definition_id")
+    private SeatLayoutDefinition seatLayoutDefinition;
 
     @Column(name = "seat_inventory_status")
     @Enumerated(EnumType.STRING)

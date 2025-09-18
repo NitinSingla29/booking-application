@@ -2,7 +2,7 @@ package com.example.catalog.service;
 
 import com.example.catalog.domain.jpa.City;
 import com.example.catalog.domain.jpa.Screen;
-import com.example.catalog.domain.jpa.SeatDefinition;
+import com.example.catalog.domain.jpa.SeatLayoutDefinition;
 import com.example.catalog.domain.jpa.Theatre;
 import com.example.catalog.repository.jpa.ICityRepository;
 import com.example.catalog.repository.jpa.ITheatreRepository;
@@ -88,14 +88,14 @@ public class TheatreService {
 
         if (screenReq.getSeats() != null) {
             for (SeatDefinitionSaveRequest seatReq : screenReq.getSeats()) {
-                SeatDefinition seat = new SeatDefinition(
+                SeatLayoutDefinition seat = new SeatLayoutDefinition(
                         screen,
                         seatReq.getSeatCode(),
                         seatReq.getSeatType(),
                         seatReq.getRowNumber(),
                         seatReq.getColumnNumber()
                 );
-                screen.getSeatDefinitions().add(seat);
+                screen.getSeatLayoutDefinitions().add(seat);
             }
         }
         theatre.getScreens().add(screen);
@@ -122,13 +122,13 @@ public class TheatreService {
         resp.setId(screen.getId());
         resp.setSystemCode(screen.getSystemCode());
         resp.setName(screen.getName());
-        if (screen.getSeatDefinitions() != null) {
-            resp.setSeats(screen.getSeatDefinitions().stream().map(this::toSeatResponse).collect(Collectors.toList()));
+        if (screen.getSeatLayoutDefinitions() != null) {
+            resp.setSeats(screen.getSeatLayoutDefinitions().stream().map(this::toSeatResponse).collect(Collectors.toList()));
         }
         return resp;
     }
 
-    private SeatDefinitionResponse toSeatResponse(SeatDefinition seat) {
+    private SeatDefinitionResponse toSeatResponse(SeatLayoutDefinition seat) {
         SeatDefinitionResponse resp = new SeatDefinitionResponse();
         resp.setId(seat.getId());
         resp.setSystemCode(seat.getSystemCode());

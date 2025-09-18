@@ -22,6 +22,6 @@ public class Screen extends SystemCodedRelationEntity {
     private String name;
 
     @OneToMany(mappedBy = "screen", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private List<SeatDefinition> seatDefinitions = new ArrayList<>();
+    private List<SeatLayoutDefinition> seatLayoutDefinitions = new ArrayList<>();
 
 }
