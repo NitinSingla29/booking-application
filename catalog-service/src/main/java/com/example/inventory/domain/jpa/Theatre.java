@@ -2,6 +2,7 @@ package com.example.inventory.domain.jpa;
 
 import com.example.inventory.domain.jpa.base.SystemCodedRelationEntity;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,9 +12,9 @@ import java.util.List;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @Entity
 @Table(name = "theatre")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Theatre extends SystemCodedRelationEntity {
 
     @Column(name = "name")

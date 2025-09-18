@@ -30,22 +30,7 @@ public class TheatreService {
 
         if (request.getScreens() != null) {
             for (ScreenSaveRequest screenReq : request.getScreens()) {
-                Screen screen = new Screen();
-                screen.setName(screenReq.getName());
-                screen.setTheatre(theatre);
-
-                if (screenReq.getSeats() != null) {
-                    for (SeatDefinitionSaveRequest seatReq : screenReq.getSeats()) {
-                        SeatDefinition seat = new SeatDefinition();
-                        seat.setScreen(screen);
-                        seat.setSeatCode(seatReq.getSeatCode());
-                        seat.setSeatType(seatReq.getSeatType());
-                        seat.setRowNumber(seatReq.getRowNumber());
-                        seat.setColumnNumber(seatReq.getColumnNumber());
-                        screen.getSeatLayouts().add(seat);
-                    }
-                }
-                theatre.getScreens().add(screen);
+                addScreenInTheatre(screenReq, theatre);
             }
         }
 
@@ -63,7 +48,9 @@ public class TheatreService {
     @Transactional
     public TheatreResponse updateTheatreBySystemCode(String systemCode, TheatreSaveRequest request) {
         Optional<Theatre> opt = theatreRepository.findBySystemCode(systemCode);
-        if (opt.isEmpty()) return null;
+        if (opt.isEmpty()) {
+            return null;
+        }
         Theatre theatre = opt.get();
 
         theatre.setName(request.getName());
@@ -79,22 +66,7 @@ public class TheatreService {
         theatre.getScreens().clear();
         if (request.getScreens() != null) {
             for (ScreenSaveRequest screenReq : request.getScreens()) {
-                Screen screen = new Screen();
-                screen.setName(screenReq.getName());
-                screen.setTheatre(theatre);
-
-                if (screenReq.getSeats() != null) {
-                    for (SeatDefinitionSaveRequest seatReq : screenReq.getSeats()) {
-                        SeatDefinition seat = new SeatDefinition();
-                        seat.setScreen(screen);
-                        seat.setSeatCode(seatReq.getSeatCode());
-                        seat.setSeatType(seatReq.getSeatType());
-                        seat.setRowNumber(seatReq.getRowNumber());
-                        seat.setColumnNumber(seatReq.getColumnNumber());
-                        screen.getSeatLayouts().add(seat);
-                    }
-                }
-                theatre.getScreens().add(screen);
+                addScreenInTheatre(screenReq, theatre);
             }
         }
 
@@ -102,10 +74,31 @@ public class TheatreService {
         return toResponse(updated);
     }
 
+
     @Transactional
     public void deleteTheatreBySystemCode(String systemCode) {
         theatreRepository.findBySystemCode(systemCode)
                 .ifPresent(theatreRepository::delete);
+    }
+
+    private void addScreenInTheatre(ScreenSaveRequest screenReq, Theatre theatre) {
+        Screen screen = new Screen();
+        screen.setName(screenReq.getName());
+        screen.setTheatre(theatre);
+
+        if (screenReq.getSeats() != null) {
+            for (SeatDefinitionSaveRequest seatReq : screenReq.getSeats()) {
+                SeatDefinition seat = new SeatDefinition(
+                        screen,
+                        seatReq.getSeatCode(),
+                        seatReq.getSeatType(),
+                        seatReq.getRowNumber(),
+                        seatReq.getColumnNumber()
+                );
+                screen.getSeatDefinitions().add(seat);
+            }
+        }
+        theatre.getScreens().add(screen);
     }
 
     private TheatreResponse toResponse(Theatre theatre) {
@@ -129,8 +122,8 @@ public class TheatreService {
         resp.setId(screen.getId());
         resp.setSystemCode(screen.getSystemCode());
         resp.setName(screen.getName());
-        if (screen.getSeatLayouts() != null) {
-            resp.setSeats(screen.getSeatLayouts().stream().map(this::toSeatResponse).collect(Collectors.toList()));
+        if (screen.getSeatDefinitions() != null) {
+            resp.setSeats(screen.getSeatDefinitions().stream().map(this::toSeatResponse).collect(Collectors.toList()));
         }
         return resp;
     }
