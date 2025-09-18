@@ -1,7 +1,12 @@
 package com.example.catalog.transfer.show;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDate;
 
+@Getter
+@Setter
 public class ShowListingRequest {
     private String city;
 

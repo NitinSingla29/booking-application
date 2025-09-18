@@ -6,7 +6,11 @@ import com.example.catalog.enumeration.SeatInventoryStatus;
 import com.example.catalog.enumeration.ShowStatus;
 import com.example.catalog.repository.jpa.*;
 import com.example.catalog.transfer.show.*;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -113,6 +117,28 @@ public class ShowService {
         ShowSeatInventoryResponse response = new ShowSeatInventoryResponse();
         response.setSeats(seatInfos);
         return response;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ShowResponse> findShows(ShowListingRequest request) {
+        Specification<Show> spec = (root, query, cb) -> {
+            Predicate predicate = cb.conjunction();
+
+            if (request.getCity() != null) {
+                predicate = cb.and(predicate, cb.equal(root.get("theatre").get("city").get("name"), request.getCity()));
+            }
+            if (request.getMovieTitle() != null) {
+                predicate = cb.and(predicate, cb.equal(root.get("movie").get("title"), request.getMovieTitle()));
+            }
+            if (request.getMovieDate() != null) {
+                predicate = cb.and(predicate, cb.equal(root.get("showDate"), request.getMovieDate()));
+            }
+            return predicate;
+        };
+
+        PageRequest pageRequest = PageRequest.of(request.getPageNumber(), request.getPageSize());
+        Page<Show> shows = showRepository.findAll(spec, pageRequest);
+        return shows.map(this::toResponse);
     }
 
     private static ShowSeatInventoryResponse.SeatInfo getSeatInfo(SeatInventoryEntry entry) {

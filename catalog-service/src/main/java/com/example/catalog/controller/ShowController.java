@@ -3,6 +3,7 @@ package com.example.catalog.controller;
 import com.example.catalog.service.ShowService;
 import com.example.catalog.transfer.show.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,5 +48,11 @@ public class ShowController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/listing")
+    public ResponseEntity<Page<ShowResponse>> findShows(@RequestBody ShowListingRequest request) {
+        Page<ShowResponse> shows = showService.findShows(request);
+        return ResponseEntity.ok(shows);
     }
 }
