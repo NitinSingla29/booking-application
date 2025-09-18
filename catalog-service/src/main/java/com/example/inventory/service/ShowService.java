@@ -65,7 +65,7 @@ public class ShowService {
 
         if (request.getMovieSystemCode() != null) {
             Movie movie = movieRepository.findBySystemCode(request.getMovieSystemCode()).orElse(null);
-            show.setMovieId(movie);
+            show.setMovie(movie);
         }
         if (request.getScreenSystemCode() != null) {
             Screen screen = screenRepository.findBySystemCode(request.getScreenSystemCode()).orElse(null);
@@ -73,7 +73,7 @@ public class ShowService {
         }
         if (request.getTheatreSystemCode() != null) {
             Theatre theatre = theatreRepository.findBySystemCode(request.getTheatreSystemCode()).orElse(null);
-            show.setTheatreId(theatre);
+            show.setTheatre(theatre);
         }
         if (request.getStartTime() != null) {
             show.setStartTime(request.getStartTime());
@@ -131,9 +131,9 @@ public class ShowService {
         ShowResponse resp = new ShowResponse();
         resp.setId(show.getId());
         resp.setSystemCode(show.getSystemCode());
-        resp.setMovieSystemCode(show.getMovieId() != null ? show.getMovieId().getSystemCode() : null);
+        resp.setMovieSystemCode(show.getMovie() != null ? show.getMovie().getSystemCode() : null);
         resp.setScreenSystemCode(show.getScreen() != null ? show.getScreen().getSystemCode() : null);
-        resp.setTheatreSystemCode(show.getTheatreId() != null ? show.getTheatreId().getSystemCode() : null);
+        resp.setTheatreSystemCode(show.getTheatre() != null ? show.getTheatre().getSystemCode() : null);
         resp.setStartTime(show.getStartTime());
         resp.setEndTime(show.getEndTime());
         resp.setShowDate(show.getShowDate());

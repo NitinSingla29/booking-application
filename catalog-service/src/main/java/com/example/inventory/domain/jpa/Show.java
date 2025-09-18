@@ -3,9 +3,11 @@ package com.example.inventory.domain.jpa;
 import com.example.inventory.domain.jpa.base.SystemCodedRelationEntity;
 import com.example.inventory.enumeration.ShowStatus;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.util.Assert;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,12 +16,12 @@ import java.time.LocalDateTime;
 @Table(name = "shows")
 @Getter
 @Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Show extends SystemCodedRelationEntity {
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "movie_id")
-    private Movie movieId;
+    private Movie movie;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "screen_id")
@@ -27,7 +29,7 @@ public class Show extends SystemCodedRelationEntity {
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "theatre_id")
-    private Theatre theatreId;
+    private Theatre theatre;
 
     @Column(name = "start_time")
     private LocalDateTime startTime;
@@ -43,10 +45,13 @@ public class Show extends SystemCodedRelationEntity {
     private ShowStatus showStatus;
 
 
-    public Show(Movie movieId, Screen screen, Theatre theatreId, LocalDateTime startTime, LocalDateTime endTime, LocalDate showDate, ShowStatus showStatus) {
-        this.movieId = movieId;
+    public Show(Movie movie, Screen screen, Theatre theatre, LocalDateTime startTime, LocalDateTime endTime, LocalDate showDate, ShowStatus showStatus) {
+        Assert.notNull(movie, "Argument [movie] must be present");
+        Assert.notNull(screen, "Argument [screen] must be present");
+        Assert.notNull(theatre, "Argument [theatre] must be present");
+        this.movie = movie;
         this.screen = screen;
-        this.theatreId = theatreId;
+        this.theatre = theatre;
         this.startTime = startTime;
         this.endTime = endTime;
         this.showDate = showDate;
