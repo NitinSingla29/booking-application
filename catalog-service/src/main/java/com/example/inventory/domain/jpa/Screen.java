@@ -11,7 +11,7 @@ import java.util.List;
 @Table(name = "screen")
 @Getter
 @Setter
-public class Screen extends RelationEntity {
+public class Screen extends SystemCodedRelationEntity {
 
     @ManyToOne
     @JoinColumn(name = "theatre_id")

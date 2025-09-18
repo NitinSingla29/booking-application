@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 @Table(name = "seat_layout", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"screen_id", "seat_code"})})
-public class SeatDefinition extends RelationEntity {
+public class SeatDefinition extends SystemCodedRelationEntity {
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "screen_id")

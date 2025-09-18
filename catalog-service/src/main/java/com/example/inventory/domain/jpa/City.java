@@ -12,7 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "city")
-public class City extends RelationEntity {
+public class City extends SystemCodedRelationEntity {
 
     @Column(name = "name")
     private String name;
