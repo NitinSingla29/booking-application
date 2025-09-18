@@ -158,6 +158,7 @@ public class ShowControllerTest extends BaseTest {
 
     @Test
     void testFindShows_Pagination() throws Exception {
+        showRepository.deleteAll();
         // Create 15 shows for pagination
         for (int i = 0; i < 15; i++) {
             Show showPaginated = new Show(movie, screen, theatre, LocalDateTime.now().plusHours(i), LocalDateTime.now().plusHours(i + 2), LocalDate.now(), ShowStatus.SCHEDULED);
