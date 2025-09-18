@@ -92,10 +92,6 @@ public class ShowService {
         return toResponse(updated);
     }
 
-    @Transactional
-    public void deleteShowBySystemCode(String systemCode) {
-        showRepository.findBySystemCode(systemCode).ifPresent(showRepository::delete);
-    }
 
     @Transactional(readOnly = true)
     public ShowSeatInventoryResponse getSeatInventoryForShow(ShowSeatInventoryRequest request) {

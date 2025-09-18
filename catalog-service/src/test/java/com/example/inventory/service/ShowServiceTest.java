@@ -15,7 +15,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ShowServiceTest extends BaseTest {
 
@@ -117,15 +118,6 @@ public class ShowServiceTest extends BaseTest {
         assertEquals(ShowStatus.CANCELLED, resp.getShowStatus());
     }
 
-    @Test
-    void testDeleteShowBySystemCode() {
-        ShowResponse show = createShow();
-
-        String systemCode = show.getSystemCode();
-
-        showService.deleteShowBySystemCode(systemCode);
-        assertFalse(showRepository.findBySystemCode(systemCode).isPresent());
-    }
 
     @Test
     void testGetSeatInventoryForShow_AllSeats() {

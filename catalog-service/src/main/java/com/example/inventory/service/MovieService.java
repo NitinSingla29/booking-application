@@ -7,6 +7,7 @@ import com.example.inventory.transfer.movie.MovieResponse;
 import com.example.inventory.transfer.movie.MovieSaveRequest;
 import com.example.inventory.transfer.movie.MovieSaveResponse;
 import com.example.inventory.transfer.movie.MovieUpdateRequest;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ public class MovieService {
     @Autowired
     private IMovieRepository movieRepository;
 
+    @Transactional
     public MovieSaveResponse saveMovie(MovieSaveRequest request) {
         Movie movie = new Movie();
         movie.setTitle(request.getTitle());
@@ -53,6 +55,7 @@ public class MovieService {
     }
 
 
+    @Transactional
     public MovieResponse updateMovieBySystemCode(MovieUpdateRequest request) {
         Optional<Movie> movieOpt = movieRepository.findBySystemCode(request.getSystemCode());
         if (movieOpt.isPresent()) {
@@ -71,7 +74,7 @@ public class MovieService {
         return null;
     }
 
-    private static MovieResponse getMovieDetail(Movie updated) {
+    private MovieResponse getMovieDetail(Movie updated) {
         MovieResponse response = new MovieResponse();
         response.setId(updated.getId());
         response.setSystemCode(updated.getSystemCode() != null ? updated.getSystemCode().toString() : null);
@@ -84,6 +87,7 @@ public class MovieService {
         return response;
     }
 
+    @Transactional
     public void deleteMovieBySystemCode(String systemCode) {
         Optional<Movie> movieOpt = movieRepository.findBySystemCode(systemCode);
         movieOpt.ifPresent(movieRepository::delete);
