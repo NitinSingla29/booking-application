@@ -7,6 +7,7 @@ import com.example.catalog.repository.jpa.IMovieRepository;
 import com.example.catalog.repository.jpa.IScreenRepository;
 import com.example.catalog.repository.jpa.IShowRepository;
 import com.example.catalog.repository.jpa.ITheatreRepository;
+import com.example.catalog.transfer.show.ShowListingRequest;
 import com.example.catalog.transfer.show.ShowSaveRequest;
 import com.example.catalog.transfer.show.ShowUpdateRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -119,4 +120,70 @@ public class ShowControllerTest extends BaseTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void testFindShows_FilterByCityMovieDate() throws Exception {
+        // Create another city, theatre, movie, and show
+        City city2 = new City();
+        city2.setName("Other City");
+        Theatre theatre2 = new Theatre("Other Theatre", city2, "Addr", "Suite", "54321");
+        theatreRepository.save(theatre2);
+
+        Movie movie2 = new Movie("Other Movie", 90, "Hindi", "Comedy");
+        movieRepository.save(movie2);
+
+        Screen screen2 = new Screen();
+        screen2.setName("Other Screen");
+        screen2.setTheatre(theatre2);
+        screenRepository.save(screen2);
+
+        Show show2 = new Show(movie2, screen2, theatre2, LocalDateTime.now(), LocalDateTime.now().plusHours(2), LocalDate.of(2024, 6, 2), ShowStatus.SCHEDULED);
+        showRepository.save(show2);
+
+        // Filter for first city, movie, and date
+        ShowListingRequest filterReq = new ShowListingRequest();
+        filterReq.setCity("Test City");
+        filterReq.setMovieTitle("Test Movie");
+        filterReq.setMovieDate(LocalDate.now());
+        filterReq.setPageSize(10);
+        filterReq.setPageNumber(0);
+
+        mockMvc.perform(post("/api/shows/listing")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(filterReq)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].movieSystemCode").value(movie.getSystemCode()))
+                .andExpect(jsonPath("$.totalElements").value(1));
+    }
+
+    @Test
+    void testFindShows_Pagination() throws Exception {
+        // Create 15 shows for pagination
+        for (int i = 0; i < 15; i++) {
+            Show showPaginated = new Show(movie, screen, theatre, LocalDateTime.now().plusHours(i), LocalDateTime.now().plusHours(i + 2), LocalDate.now(), ShowStatus.SCHEDULED);
+            showRepository.save(showPaginated);
+        }
+
+        ShowListingRequest pageReq = new ShowListingRequest();
+        pageReq.setCity("Test City");
+        pageReq.setMovieTitle("Test Movie");
+        pageReq.setMovieDate(LocalDate.now());
+        pageReq.setPageSize(10);
+        pageReq.setPageNumber(0);
+
+        mockMvc.perform(post("/api/shows/listing")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(pageReq)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(10))
+                .andExpect(jsonPath("$.totalElements").value(15));
+
+        pageReq.setPageNumber(1);
+        mockMvc.perform(post("/api/shows/listing")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(pageReq)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(5));
+    }
+
 }

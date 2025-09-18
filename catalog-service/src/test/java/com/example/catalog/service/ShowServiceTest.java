@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,57 +34,51 @@ public class ShowServiceTest extends BaseTest {
     @Autowired
     private ISeatInventoryEntryRepository seatInventoryEntryRepository;
 
-    private Movie movie;
-    private Screen screen;
-    private Theatre theatre;
-    private SeatDefinition seatDef;
+    private Movie movie1, movie2;
+    private Theatre theatre1, theatre2;
+    private Screen screen1, screen2;
+    private SeatDefinition seatDef1, seatDef2;
 
     @BeforeEach
     void setUp() {
-        movie = new Movie("Test Movie", 120, "English", "Drama");
-        movieRepository.save(movie);
+        // Cities
+        City city1 = new City();
+        city1.setName("Test City");
+        City city2 = new City();
+        city2.setName("Other City");
 
-        City city = new City();
-        city.setName("Test City");
+        // Theatres
+        theatre1 = new Theatre("Test Theatre", city1, "123 Main St", "Suite 1", "12345");
+        theatre2 = new Theatre("Other Theatre", city2, "456 Side St", "Suite 2", "54321");
+        theatreRepository.save(theatre1);
+        theatreRepository.save(theatre2);
 
-        theatre = new Theatre("Test Theatre", city, "123 Main St", "Suite 1", "12345");
-        theatreRepository.save(theatre);
+        // Movies
+        movie1 = new Movie("Test Movie", 120, "English", "Drama");
+        movie2 = new Movie("Other Movie", 90, "Hindi", "Comedy");
+        movieRepository.save(movie1);
+        movieRepository.save(movie2);
 
-        // Create multiple screens
-        List<Screen> screens = new java.util.ArrayList<>();
-        for (int s = 1; s <= 3; s++) { // 3 screens
-            Screen screen = new Screen();
-            screen.setName("Screen " + s);
+        // Screens and seats for both theatres
+        screen1 = createScreenWithSeats("Screen 1", theatre1);
+        screen2 = createScreenWithSeats("Screen 2", theatre2);
 
-            List<SeatDefinition> seatDefs = new java.util.ArrayList<>();
-            for (int row = 1; row <= 5; row++) {
-                for (int col = 1; col <= 10; col++) {
-                    SeatType seatType = (row == 1) ? SeatType.PREMIUM : SeatType.STANDARD;
-                    SeatDefinition seat = new SeatDefinition(screen, "S" + s + "R" + row + "C" + col, seatType, row, col);
-                    seatDefs.add(seat);
-                }
-            }
-            screen.setSeatDefinitions(seatDefs);
-            screen.setTheatre(theatre); // associate screen with theatre
-            screenRepository.save(screen);
+        screenRepository.save(screen1);
+        screenRepository.save(screen2);
 
-            screens.add(screen);
-        }
-
-        // Use the first screen and seat for tests
-        screen = screens.get(0);
-        seatDef = screen.getSeatDefinitions().get(0);
+        seatDef1 = screen1.getSeatDefinitions().get(0);
+        seatDef2 = screen2.getSeatDefinitions().get(0);
     }
 
 
     @Test
     void testSaveShowAndSeatInventory() {
-        ShowResponse resp = createShow();
+        ShowResponse resp = createShow(movie1, screen1, theatre1, LocalDate.now(), ShowStatus.SCHEDULED);
 
         assertNotNull(resp);
-        assertEquals(movie.getSystemCode(), resp.getMovieSystemCode());
-        assertEquals(screen.getSystemCode(), resp.getScreenSystemCode());
-        assertEquals(theatre.getSystemCode(), resp.getTheatreSystemCode());
+        assertEquals(movie1.getSystemCode(), resp.getMovieSystemCode());
+        assertEquals(screen1.getSystemCode(), resp.getScreenSystemCode());
+        assertEquals(theatre1.getSystemCode(), resp.getTheatreSystemCode());
 
         Show show = showRepository.findBySystemCode(resp.getSystemCode()).orElse(null);
         assertNotNull(show);
@@ -95,7 +90,7 @@ public class ShowServiceTest extends BaseTest {
 
     @Test
     void testGetShowBySystemCode() {
-        ShowResponse show = createShow();
+        ShowResponse show = createShow(movie1, screen1, theatre1, LocalDate.now(), ShowStatus.SCHEDULED);
         String systemCode = show.getSystemCode();
 
         ShowResponse resp = showService.getShowBySystemCode(systemCode);
@@ -105,7 +100,7 @@ public class ShowServiceTest extends BaseTest {
 
     @Test
     void testUpdateShowBySystemCode() {
-        ShowResponse show = createShow();
+        ShowResponse show = createShow(movie1, screen1, theatre1, LocalDate.now(), ShowStatus.SCHEDULED);
 
         String systemCode = show.getSystemCode();
 
@@ -118,10 +113,9 @@ public class ShowServiceTest extends BaseTest {
         assertEquals(ShowStatus.CANCELLED, resp.getShowStatus());
     }
 
-
     @Test
     void testGetSeatInventoryForShow_AllSeats() {
-        ShowResponse show = createShow();
+        ShowResponse show = createShow(movie1, screen1, theatre1, LocalDate.now(), ShowStatus.SCHEDULED);
 
         String systemCode = show.getSystemCode();
 
@@ -135,7 +129,7 @@ public class ShowServiceTest extends BaseTest {
 
     @Test
     void testGetSeatInventoryForShow_FilteredByStatus() {
-        ShowResponse show = createShow();
+        ShowResponse show = createShow(movie1, screen1, theatre1, LocalDate.now(), ShowStatus.SCHEDULED);
         String systemCode = show.getSystemCode();
 
         ShowSeatInventoryRequest req = new ShowSeatInventoryRequest();
@@ -148,18 +142,74 @@ public class ShowServiceTest extends BaseTest {
         assertEquals(SeatInventoryStatus.AVAILABLE, resp.getSeats().get(0).getSeatStatus());
     }
 
-    private ShowResponse createShow() {
+    @Test
+    void testFindShows_FilterByCityMovieDate() {
+        // Create shows in both cities, movies, and dates
+        createShow(movie1, screen1, theatre1, LocalDate.of(2024, 6, 1), ShowStatus.SCHEDULED);
+        createShow(movie2, screen2, theatre2, LocalDate.of(2024, 6, 2), ShowStatus.SCHEDULED);
+
+        ShowListingRequest filterReq = new ShowListingRequest();
+        filterReq.setCity("Test City");
+        filterReq.setMovieTitle("Test Movie");
+        filterReq.setMovieDate(LocalDate.of(2024, 6, 1));
+        filterReq.setPageSize(10);
+        filterReq.setPageNumber(0);
+
+        var page = showService.findShows(filterReq);
+        assertEquals(1, page.getTotalElements());
+        assertEquals("Test Movie", movie1.getTitle());
+    }
+
+    @Test
+    void testFindShows_Pagination() {
+        // Create 15 shows for pagination in Test City
+        for (int i = 0; i < 15; i++) {
+            createShow(movie1, screen1, theatre1, LocalDate.now(), ShowStatus.SCHEDULED);
+        }
+
+        ShowListingRequest pageReq = new ShowListingRequest();
+        pageReq.setCity("Test City");
+        pageReq.setMovieTitle("Test Movie");
+        pageReq.setMovieDate(LocalDate.now());
+        pageReq.setPageSize(10);
+        pageReq.setPageNumber(0);
+
+        var page1 = showService.findShows(pageReq);
+        assertEquals(10, page1.getContent().size());
+        assertEquals(15, page1.getTotalElements());
+
+        pageReq.setPageNumber(1);
+        var page2 = showService.findShows(pageReq);
+        assertEquals(5, page2.getContent().size());
+    }
+
+    private Screen createScreenWithSeats(String name, Theatre theatre) {
+        Screen screen = new Screen();
+        screen.setName(name);
+        screen.setTheatre(theatre);
+
+        List<SeatDefinition> seatDefs = new ArrayList<>();
+        for (int row = 1; row <= 5; row++) {
+            for (int col = 1; col <= 10; col++) {
+                SeatType seatType = (row == 1) ? SeatType.PREMIUM : SeatType.STANDARD;
+                SeatDefinition seat = new SeatDefinition(screen, name + "R" + row + "C" + col, seatType, row, col);
+                seatDefs.add(seat);
+            }
+        }
+        screen.setSeatDefinitions(seatDefs);
+        return screen;
+    }
+
+    private ShowResponse createShow(Movie movie, Screen screen, Theatre theatre, LocalDate showDate, ShowStatus status) {
         ShowSaveRequest req = new ShowSaveRequest();
         req.setMovieSystemCode(movie.getSystemCode());
         req.setScreenSystemCode(screen.getSystemCode());
         req.setTheatreSystemCode(theatre.getSystemCode());
         req.setStartTime(LocalDateTime.now());
         req.setEndTime(LocalDateTime.now().plusHours(2));
-        req.setShowDate(LocalDate.now());
-        req.setShowStatus(ShowStatus.SCHEDULED);
+        req.setShowDate(showDate);
+        req.setShowStatus(status);
 
-        ShowResponse resp = showService.saveShow(req);
-        return resp;
+        return showService.saveShow(req);
     }
-
 }
