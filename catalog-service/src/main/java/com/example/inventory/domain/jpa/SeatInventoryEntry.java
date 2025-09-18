@@ -1,5 +1,6 @@
 package com.example.inventory.domain.jpa;
 
+import com.example.inventory.domain.jpa.base.SystemCodedRelationEntity;
 import com.example.inventory.enumeration.SeatInventoryStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 @Table(name = "seat_inventory_entry")
 @Getter
 @Setter
-public class SeatInventoryEntry extends RelationEntity {
+public class SeatInventoryEntry extends SystemCodedRelationEntity {
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "show_id")

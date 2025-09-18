@@ -1,5 +1,6 @@
 package com.example.inventory.domain.jpa;
 
+import com.example.inventory.domain.jpa.base.SystemCodedRelationEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

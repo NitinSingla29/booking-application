@@ -1,5 +1,6 @@
 package com.example.inventory.domain.jpa;
 
+import com.example.inventory.domain.jpa.base.SystemCodedRelationEntity;
 import com.example.inventory.enumeration.ShowStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Show extends RelationEntity {
+public class Show extends SystemCodedRelationEntity {
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "movie_id")

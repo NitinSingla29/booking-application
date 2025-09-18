@@ -1,4 +1,4 @@
-package com.example.inventory.domain.jpa;
+package com.example.inventory.domain.jpa.base;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
