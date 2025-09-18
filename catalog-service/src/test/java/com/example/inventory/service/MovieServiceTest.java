@@ -1,5 +1,6 @@
 package com.example.inventory.service;
 
+import com.example.inventory.BaseTest;
 import com.example.inventory.transfer.movie.MovieSaveRequest;
 import com.example.inventory.transfer.movie.MovieUpdateRequest;
 import org.junit.jupiter.api.Test;

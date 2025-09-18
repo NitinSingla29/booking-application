@@ -1,4 +1,4 @@
-package com.example.inventory.service;
+package com.example.inventory;
 
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;

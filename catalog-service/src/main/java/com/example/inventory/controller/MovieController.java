@@ -1,4 +1,4 @@
-package com.example.inventory.controller.movie;
+package com.example.inventory.controller;
 
 import com.example.inventory.service.MovieService;
 import com.example.inventory.transfer.movie.MovieResponse;

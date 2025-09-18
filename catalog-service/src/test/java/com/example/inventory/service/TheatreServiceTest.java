@@ -1,6 +1,7 @@
 package com.example.inventory.service;
 
 
+import com.example.inventory.BaseTest;
 import com.example.inventory.domain.jpa.City;
 import com.example.inventory.enumeration.SeatType;
 import com.example.inventory.repository.jpa.ICityRepository;
