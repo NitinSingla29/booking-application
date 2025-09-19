@@ -34,7 +34,7 @@ class TheatreServiceTest extends BaseTest {
     private TheatreSaveRequest buildTheatreRequest(Long cityId) {
         SeatDefinitionSaveRequest seat1 = new SeatDefinitionSaveRequest();
         seat1.setSeatCode("A1");
-        seat1.setSeatType(SeatType.STANDARD);
+        seat1.setSeatType(SeatType.REGULAR);
         seat1.setRowNumber(1);
         seat1.setColumnNumber(1);
 

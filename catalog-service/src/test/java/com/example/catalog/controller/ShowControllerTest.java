@@ -2,11 +2,11 @@ package com.example.catalog.controller;
 
 import com.example.catalog.BaseTest;
 import com.example.catalog.domain.jpa.*;
+import com.example.catalog.enumeration.SeatInventoryStatus;
+import com.example.catalog.enumeration.SeatType;
 import com.example.catalog.enumeration.ShowStatus;
-import com.example.catalog.repository.jpa.IMovieRepository;
-import com.example.catalog.repository.jpa.IScreenRepository;
-import com.example.catalog.repository.jpa.IShowRepository;
-import com.example.catalog.repository.jpa.ITheatreRepository;
+import com.example.catalog.repository.jpa.*;
+import com.example.catalog.transfer.client.SeatHoldRequest;
 import com.example.catalog.transfer.show.ShowListingRequest;
 import com.example.catalog.transfer.show.ShowSaveRequest;
 import com.example.catalog.transfer.show.ShowUpdateRequest;
@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -42,6 +43,9 @@ public class ShowControllerTest extends BaseTest {
     private ITheatreRepository theatreRepository;
     @Autowired
     private IShowRepository showRepository;
+
+    @Autowired
+    private ISeatInventoryEntryRepository seatInventoryEntryRepository;
 
     private Movie movie;
     private Screen screen;
@@ -78,7 +82,7 @@ public class ShowControllerTest extends BaseTest {
         request.setShowDate(LocalDate.now());
         request.setShowStatus(ShowStatus.SCHEDULED);
 
-        mockMvc.perform(post("/api/shows")
+        mockMvc.perform(post("/catalog/shows")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -87,14 +91,14 @@ public class ShowControllerTest extends BaseTest {
 
     @Test
     void testGetShow_Found() throws Exception {
-        mockMvc.perform(get("/api/shows/" + show.getSystemCode()))
+        mockMvc.perform(get("/catalog/shows/" + show.getSystemCode()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.systemCode").value(show.getSystemCode()));
     }
 
     @Test
     void testGetShow_NotFound() throws Exception {
-        mockMvc.perform(get("/api/shows/notfound"))
+        mockMvc.perform(get("/catalog/shows/notfound"))
                 .andExpect(status().isNotFound());
     }
 
@@ -103,7 +107,7 @@ public class ShowControllerTest extends BaseTest {
         ShowUpdateRequest request = new ShowUpdateRequest();
         request.setShowStatus(ShowStatus.CANCELLED);
 
-        mockMvc.perform(put("/api/shows/" + show.getSystemCode())
+        mockMvc.perform(put("/catalog/shows/" + show.getSystemCode())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -115,7 +119,7 @@ public class ShowControllerTest extends BaseTest {
         ShowUpdateRequest request = new ShowUpdateRequest();
         request.setShowStatus(ShowStatus.CANCELLED);
 
-        mockMvc.perform(put("/api/shows/notfound")
+        mockMvc.perform(put("/catalog/shows/notfound")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -148,7 +152,7 @@ public class ShowControllerTest extends BaseTest {
         filterReq.setPageSize(10);
         filterReq.setPageNumber(0);
 
-        mockMvc.perform(post("/api/shows/listing")
+        mockMvc.perform(post("/catalog/shows/listing")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(filterReq)))
                 .andExpect(status().isOk())
@@ -172,7 +176,7 @@ public class ShowControllerTest extends BaseTest {
         pageReq.setPageSize(10);
         pageReq.setPageNumber(0);
 
-        mockMvc.perform(post("/api/shows/listing")
+        mockMvc.perform(post("/catalog/shows/listing")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(pageReq)))
                 .andExpect(status().isOk())
@@ -180,11 +184,45 @@ public class ShowControllerTest extends BaseTest {
                 .andExpect(jsonPath("$.totalElements").value(15));
 
         pageReq.setPageNumber(1);
-        mockMvc.perform(post("/api/shows/listing")
+        mockMvc.perform(post("/catalog/shows/listing")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(pageReq)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(5));
     }
+
+    @Test
+    void testHoldSeats_Success() throws Exception {
+        // Create a seat for the screen using the constructor
+        SeatLayoutDefinition seat = new SeatLayoutDefinition(screen, "A1", SeatType.REGULAR, 1, 1);
+        screen.getSeatLayoutDefinitions().add(seat);
+
+        // Save screen and seat
+        screenRepository.save(screen);
+
+        // Create SeatInventoryEntry for the show
+        SeatInventoryEntry entry = new SeatInventoryEntry();
+        entry.setShow(show);
+        entry.setSeatLayoutDefinition(seat);
+        entry.setSeatInventoryStatus(SeatInventoryStatus.AVAILABLE);
+
+        // Save entry
+        seatInventoryEntryRepository.save(entry);
+
+        // Prepare request
+        SeatHoldRequest req = new SeatHoldRequest();
+        req.setShowSystemCode(show.getSystemCode());
+        req.setSeatCodes(List.of("A1"));
+        req.setBookingSystemCode("BOOK123");
+
+        mockMvc.perform(post("/catalog/shows/hold-seats")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("SUCCESS"))
+                .andExpect(jsonPath("$.seatCodes[0]").value("A1"))
+                .andExpect(jsonPath("$.bookingSystemCode").value("BOOK123"));
+    }
+
 
 }

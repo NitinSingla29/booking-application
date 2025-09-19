@@ -1,6 +1,8 @@
 package com.example.catalog.controller;
 
 import com.example.catalog.service.ShowService;
+import com.example.catalog.transfer.client.SeatHoldRequest;
+import com.example.catalog.transfer.client.SeatHoldResponse;
 import com.example.catalog.transfer.show.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -8,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/shows")
+@RequestMapping("/catalog/shows")
 public class ShowController {
 
     @Autowired
@@ -49,6 +51,13 @@ public class ShowController {
         }
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/hold-seats")
+    public ResponseEntity<SeatHoldResponse> holdSeats(@RequestBody SeatHoldRequest request) {
+        SeatHoldResponse response = showService.holdSeats(request);
+        return ResponseEntity.ok(response);
+    }
+
 
     @PostMapping("/listing")
     public ResponseEntity<Page<ShowResponse>> findShows(@RequestBody ShowListingRequest request) {

@@ -259,7 +259,7 @@ public class ShowServiceTest extends BaseTest {
         List<SeatLayoutDefinition> seatDefs = new ArrayList<>();
         for (int row = 1; row <= 5; row++) {
             for (int col = 1; col <= 10; col++) {
-                SeatType seatType = (row == 1) ? SeatType.PREMIUM : SeatType.STANDARD;
+                SeatType seatType = (row == 1) ? SeatType.PREMIUM : SeatType.REGULAR;
                 SeatLayoutDefinition seat = new SeatLayoutDefinition(screen, name + "R" + row + "C" + col, seatType, row, col);
                 seatDefs.add(seat);
             }
