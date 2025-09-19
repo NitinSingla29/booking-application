@@ -7,6 +7,7 @@ import com.example.catalog.enumeration.SeatType;
 import com.example.catalog.enumeration.ShowStatus;
 import com.example.catalog.repository.jpa.*;
 import com.example.catalog.transfer.client.SeatHoldRequest;
+import com.example.catalog.transfer.client.SeatReleaseRequest;
 import com.example.catalog.transfer.show.ShowResponse;
 import com.example.catalog.transfer.show.ShowSaveRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -130,6 +131,79 @@ public class SeatInventoryServiceTest extends BaseTest {
         var resp = seatInventoryService.holdSeats(req);
         assertEquals("FAILURE", resp.getStatus().name());
         assertEquals("Some seats are not available", resp.getMessage());
+    }
+
+
+    @Test
+    void testReleaseSeats_NoSeatsFound() {
+        var req = new SeatReleaseRequest("NON_EXISTENT_CODE");
+
+        var resp = seatInventoryService.releaseSeats(req);
+        assertEquals("FAILURE", resp.getStatus().name());
+        assertEquals("No seats found for booking code", resp.getMessage());
+    }
+
+    @Test
+    void testReleaseSeats_SeatsAlreadyReleased() {
+        ShowResponse show = createShow(movie1, screen1, theatre1, LocalDate.now(), ShowStatus.SCHEDULED);
+        Show savedShow = showRepository.findBySystemCode(show.getSystemCode()).orElseThrow();
+        List<SeatInventoryEntry> entries = seatInventoryEntryRepository.findByShow(savedShow);
+
+        // Mark all seats as AVAILABLE and set booking code
+        for (SeatInventoryEntry entry : entries) {
+            entry.setSeatInventoryStatus(SeatInventoryStatus.AVAILABLE);
+            entry.setBookingSystemCode("BOOK123");
+        }
+        seatInventoryEntryRepository.saveAll(entries);
+
+        var req = new SeatReleaseRequest();
+        req.setBookingSystemCode("BOOK123");
+
+        var resp = seatInventoryService.releaseSeats(req);
+        assertEquals("SEATS_ALREADY_RELEASED", resp.getStatus().name());
+        assertEquals("Seats are already released", resp.getMessage());
+    }
+
+    @Test
+    void testReleaseSeats_SeatsAreConfirmed() {
+        ShowResponse show = createShow(movie1, screen1, theatre1, LocalDate.now(), ShowStatus.SCHEDULED);
+        Show savedShow = showRepository.findBySystemCode(show.getSystemCode()).orElseThrow();
+        List<SeatInventoryEntry> entries = seatInventoryEntryRepository.findByShow(savedShow);
+
+        // Mark one seat as CONFIRMED and set booking code
+        SeatInventoryEntry entry = entries.get(0);
+        entry.setSeatInventoryStatus(SeatInventoryStatus.CONFIRMED);
+        entry.setBookingSystemCode("BOOK123");
+        seatInventoryEntryRepository.save(entry);
+
+        var req = new SeatReleaseRequest();
+        req.setBookingSystemCode("BOOK123");
+
+        var resp = seatInventoryService.releaseSeats(req);
+        assertEquals("SEATS_ARE_CONFIRMED", resp.getStatus().name());
+        assertEquals("Seats are already confirmed", resp.getMessage());
+    }
+
+    @Test
+    void testReleaseSeats_Success() {
+        ShowResponse show = createShow(movie1, screen1, theatre1, LocalDate.now(), ShowStatus.SCHEDULED);
+        Show savedShow = showRepository.findBySystemCode(show.getSystemCode()).orElseThrow();
+        List<SeatInventoryEntry> entries = seatInventoryEntryRepository.findByShow(savedShow);
+
+        // Mark one seat as HOLD and set booking code
+        SeatInventoryEntry entry = entries.get(0);
+        entry.setSeatInventoryStatus(SeatInventoryStatus.HOLD);
+        entry.setBookingSystemCode("BOOK123");
+        seatInventoryEntryRepository.save(entry);
+
+        var req = new SeatReleaseRequest();
+        req.setBookingSystemCode("BOOK123");
+
+        var resp = seatInventoryService.releaseSeats(req);
+        assertEquals("SUCCESS", resp.getStatus().name());
+        assertEquals("Seats released successfully", resp.getMessage());
+        assertEquals("BOOK123", resp.getBookingSystemCode());
+        assertEquals(List.of(entry.getSeatLayoutDefinition().getSeatCode()), resp.getSeatCodes());
     }
 
     private Screen createScreenWithSeats(String name, Theatre theatre) {

@@ -16,4 +16,6 @@ public interface ISeatInventoryEntryRepository extends IRelationEntityRepository
     List<SeatInventoryEntry> findByShowAndSeatInventoryStatus(Show show, SeatInventoryStatus seatStatus);
 
     List<SeatInventoryEntry> findByShowAndSeatLayoutDefinition_SeatCodeIn(Show show, List<String> seatCodes);
+
+    List<SeatInventoryEntry> findByBookingSystemCode(String bookingSystemCode);
 }

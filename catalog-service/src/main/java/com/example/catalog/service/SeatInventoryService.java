@@ -3,11 +3,14 @@ package com.example.catalog.service;
 import com.example.catalog.domain.jpa.SeatInventoryEntry;
 import com.example.catalog.domain.jpa.Show;
 import com.example.catalog.enumeration.SeatInventoryStatus;
+import com.example.catalog.enumeration.SeatReleaseStatus;
 import com.example.catalog.enumeration.SeatReservationStatus;
 import com.example.catalog.repository.jpa.ISeatInventoryEntryRepository;
 import com.example.catalog.repository.jpa.IShowRepository;
 import com.example.catalog.transfer.client.SeatHoldRequest;
 import com.example.catalog.transfer.client.SeatHoldResponse;
+import com.example.catalog.transfer.client.SeatReleaseRequest;
+import com.example.catalog.transfer.client.SeatReleaseResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -67,4 +70,52 @@ public class SeatInventoryService {
         seatsReservedSuccessfully.setMovieSystemCode(show.getMovie().getSystemCode());
         return seatsReservedSuccessfully;
     }
+
+    @Transactional
+    public SeatReleaseResponse releaseSeats(SeatReleaseRequest seatReleaseRequest) {
+        List<SeatInventoryEntry> entries = seatInventoryEntryRepository
+                .findByBookingSystemCode(seatReleaseRequest.getBookingSystemCode());
+
+        if (entries.isEmpty()) {
+            return new SeatReleaseResponse(SeatReleaseStatus.FAILURE, "No seats found for booking code");
+        }
+
+        boolean allAvailable = entries.stream()
+                .allMatch(e -> e.getSeatInventoryStatus() == SeatInventoryStatus.AVAILABLE);
+        boolean anyConfirmed = entries.stream()
+                .anyMatch(e -> e.getSeatInventoryStatus() == SeatInventoryStatus.CONFIRMED);
+
+        if (allAvailable) {
+            return new SeatReleaseResponse(SeatReleaseStatus.SEATS_ALREADY_RELEASED, "Seats are already released");
+        }
+        if (anyConfirmed) {
+            return new SeatReleaseResponse(SeatReleaseStatus.SEATS_ARE_CONFIRMED, "Seats are already confirmed");
+        }
+
+        List<SeatInventoryEntry> heldEntries = entries.stream()
+                .filter(e -> e.getSeatInventoryStatus() == SeatInventoryStatus.HOLD)
+                .toList();
+
+        if (heldEntries.isEmpty()) {
+            return new SeatReleaseResponse(SeatReleaseStatus.FAILURE, "No held seats found for booking code");
+        }
+
+        for (SeatInventoryEntry entry : heldEntries) {
+            entry.setSeatInventoryStatus(SeatInventoryStatus.AVAILABLE);
+            entry.setBookingSystemCode(null);
+            entry.setHoldExpiresAt(null);
+        }
+        seatInventoryEntryRepository.saveAllAndFlush(heldEntries);
+
+        SeatReleaseResponse resp = new SeatReleaseResponse();
+        resp.setStatus(SeatReleaseStatus.SUCCESS);
+        resp.setMessage("Seats released successfully");
+        resp.setBookingSystemCode(seatReleaseRequest.getBookingSystemCode());
+        resp.setSeatCodes(heldEntries.stream()
+                .map(e -> e.getSeatLayoutDefinition().getSeatCode())
+                .toList());
+        return resp;
+    }
+
+
 }
