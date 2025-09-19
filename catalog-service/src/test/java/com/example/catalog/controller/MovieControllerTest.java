@@ -33,7 +33,7 @@ class MovieControllerTest extends BaseTest {
         request.setPosterUrl("url");
         request.setRating(8.5);
 
-        var result = mockMvc.perform(post("/movies")
+        var result = mockMvc.perform(post("/catalog/movies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -55,7 +55,7 @@ class MovieControllerTest extends BaseTest {
         request.setPosterUrl("url");
         request.setRating(8.5);
 
-        mockMvc.perform(post("/movies")
+        mockMvc.perform(post("/catalog/movies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -67,14 +67,14 @@ class MovieControllerTest extends BaseTest {
     void testGetMovie_Found() throws Exception {
         String systemCode = createMovieAndGetSystemCode();
 
-        mockMvc.perform(get("/movies/" + systemCode))
+        mockMvc.perform(get("/catalog/movies/" + systemCode))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Test Movie"));
     }
 
     @Test
     void testGetMovie_NotFound() throws Exception {
-        mockMvc.perform(get("/movies/nonexistent"))
+        mockMvc.perform(get("/catalog/movies/nonexistent"))
                 .andExpect(status().isNotFound());
     }
 
@@ -90,7 +90,7 @@ class MovieControllerTest extends BaseTest {
         updateRequest.setPosterUrl("newurl");
         updateRequest.setRating(9.0);
 
-        mockMvc.perform(put("/movies/" + systemCode)
+        mockMvc.perform(put("/catalog/movies/" + systemCode)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
@@ -107,7 +107,7 @@ class MovieControllerTest extends BaseTest {
         updateRequest.setPosterUrl("newurl");
         updateRequest.setRating(9.0);
 
-        mockMvc.perform(put("/movies/nonexistent")
+        mockMvc.perform(put("/catalog/movies/nonexistent")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isNotFound());
@@ -117,10 +117,10 @@ class MovieControllerTest extends BaseTest {
     void testDeleteMovie() throws Exception {
         String systemCode = createMovieAndGetSystemCode();
 
-        mockMvc.perform(delete("/movies/" + systemCode))
+        mockMvc.perform(delete("/catalog/movies/" + systemCode))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/movies/" + systemCode))
+        mockMvc.perform(get("/catalog/movies/" + systemCode))
                 .andExpect(status().isNotFound());
     }
 }

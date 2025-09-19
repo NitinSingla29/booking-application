@@ -65,7 +65,7 @@ class TheatreControllerTest extends BaseTest {
         Long cityId = createCityAndGetId();
         TheatreSaveRequest request = buildTheatreRequest(cityId);
 
-        var result = mockMvc.perform(post("/theatres")
+        var result = mockMvc.perform(post("/catalog/theatres")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -82,7 +82,7 @@ class TheatreControllerTest extends BaseTest {
         Long cityId = createCityAndGetId();
         TheatreSaveRequest request = buildTheatreRequest(cityId);
 
-        mockMvc.perform(post("/theatres")
+        mockMvc.perform(post("/catalog/theatres")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -94,14 +94,14 @@ class TheatreControllerTest extends BaseTest {
     void testGetTheatre_Found() throws Exception {
         String systemCode = createTheatreAndGetSystemCode();
 
-        mockMvc.perform(get("/theatres/" + systemCode))
+        mockMvc.perform(get("/catalog/theatres/" + systemCode))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Test Theatre"));
     }
 
     @Test
     void testGetTheatre_NotFound() throws Exception {
-        mockMvc.perform(get("/theatres/nonexistent"))
+        mockMvc.perform(get("/catalog/theatres/nonexistent"))
                 .andExpect(status().isNotFound());
     }
 
@@ -115,7 +115,7 @@ class TheatreControllerTest extends BaseTest {
         updateRequest.setAddressLine("456 New St");
         updateRequest.setZipCode("54321");
 
-        mockMvc.perform(put("/theatres/" + systemCode)
+        mockMvc.perform(put("/catalog/theatres/" + systemCode)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
@@ -129,7 +129,7 @@ class TheatreControllerTest extends BaseTest {
         Long cityId = createCityAndGetId();
         TheatreSaveRequest updateRequest = buildTheatreRequest(cityId);
 
-        mockMvc.perform(put("/theatres/nonexistent")
+        mockMvc.perform(put("/catalog/theatres/nonexistent")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isNotFound());
@@ -139,10 +139,10 @@ class TheatreControllerTest extends BaseTest {
     void testDeleteTheatre() throws Exception {
         String systemCode = createTheatreAndGetSystemCode();
 
-        mockMvc.perform(delete("/theatres/" + systemCode))
+        mockMvc.perform(delete("/catalog/theatres/" + systemCode))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/theatres/" + systemCode))
+        mockMvc.perform(get("/catalog/theatres/" + systemCode))
                 .andExpect(status().isNotFound());
     }
 }
