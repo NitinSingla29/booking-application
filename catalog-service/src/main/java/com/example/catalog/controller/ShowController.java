@@ -1,8 +1,6 @@
 package com.example.catalog.controller;
 
 import com.example.catalog.service.ShowService;
-import com.example.catalog.transfer.client.SeatHoldRequest;
-import com.example.catalog.transfer.client.SeatHoldResponse;
 import com.example.catalog.transfer.show.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -49,12 +47,6 @@ public class ShowController {
         if (response == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/hold-seats")
-    public ResponseEntity<SeatHoldResponse> holdSeats(@RequestBody SeatHoldRequest request) {
-        SeatHoldResponse response = showService.holdSeats(request);
         return ResponseEntity.ok(response);
     }
 

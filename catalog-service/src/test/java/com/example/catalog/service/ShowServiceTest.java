@@ -6,7 +6,6 @@ import com.example.catalog.enumeration.SeatInventoryStatus;
 import com.example.catalog.enumeration.SeatType;
 import com.example.catalog.enumeration.ShowStatus;
 import com.example.catalog.repository.jpa.*;
-import com.example.catalog.transfer.client.SeatHoldRequest;
 import com.example.catalog.transfer.show.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -184,72 +183,6 @@ public class ShowServiceTest extends BaseTest {
         assertEquals(5, page2.getContent().size());
     }
 
-
-    @Test
-    void testHoldSeats_Success() {
-        ShowResponse show = createShow(movie1, screen1, theatre1, LocalDate.now(), ShowStatus.SCHEDULED);
-        Show savedShow = showRepository.findBySystemCode(show.getSystemCode()).orElseThrow();
-        List<SeatInventoryEntry> entries = seatInventoryEntryRepository.findByShow(savedShow);
-
-        List<String> seatCodes = List.of(entries.get(0).getSeatLayoutDefinition().getSeatCode(), entries.get(1).getSeatLayoutDefinition().getSeatCode());
-
-        SeatHoldRequest req = new SeatHoldRequest();
-        req.setShowSystemCode(show.getSystemCode());
-        req.setSeatCodes(seatCodes);
-        req.setBookingSystemCode("BOOK123");
-
-        var resp = showService.holdSeats(req);
-        assertEquals("SUCCESS", resp.getStatus().name());
-        assertEquals(seatCodes.size(), resp.getSeatCodes().size());
-        assertEquals("BOOK123", resp.getBookingSystemCode());
-    }
-
-    @Test
-    void testHoldSeats_ShowNotFound() {
-        SeatHoldRequest req = new SeatHoldRequest();
-        req.setShowSystemCode("INVALID_CODE");
-        req.setSeatCodes(List.of("A1", "A2"));
-        req.setBookingSystemCode("BOOK123");
-
-        var resp = showService.holdSeats(req);
-        assertEquals("FAILURE", resp.getStatus().name());
-        assertEquals("Show not found", resp.getMessage());
-    }
-
-    @Test
-    void testHoldSeats_SeatNotFound() {
-        ShowResponse show = createShow(movie1, screen1, theatre1, LocalDate.now(), ShowStatus.SCHEDULED);
-
-        SeatHoldRequest req = new SeatHoldRequest();
-        req.setShowSystemCode(show.getSystemCode());
-        req.setSeatCodes(List.of("NON_EXISTENT_SEAT"));
-        req.setBookingSystemCode("BOOK123");
-
-        var resp = showService.holdSeats(req);
-        assertEquals("FAILURE", resp.getStatus().name());
-        assertEquals("Some seats not found", resp.getMessage());
-    }
-
-    @Test
-    void testHoldSeats_SeatNotAvailable() {
-        ShowResponse show = createShow(movie1, screen1, theatre1, LocalDate.now(), ShowStatus.SCHEDULED);
-        Show savedShow = showRepository.findBySystemCode(show.getSystemCode()).orElseThrow();
-        List<SeatInventoryEntry> entries = seatInventoryEntryRepository.findByShow(savedShow);
-
-        // Mark one seat as HOLD
-        SeatInventoryEntry entry = entries.get(0);
-        entry.setSeatInventoryStatus(SeatInventoryStatus.HOLD);
-        seatInventoryEntryRepository.save(entry);
-
-        SeatHoldRequest req = new SeatHoldRequest();
-        req.setShowSystemCode(show.getSystemCode());
-        req.setSeatCodes(List.of(entry.getSeatLayoutDefinition().getSeatCode()));
-        req.setBookingSystemCode("BOOK123");
-
-        var resp = showService.holdSeats(req);
-        assertEquals("FAILURE", resp.getStatus().name());
-        assertEquals("Some seats are not available", resp.getMessage());
-    }
 
     private Screen createScreenWithSeats(String name, Theatre theatre) {
         Screen screen = new Screen();

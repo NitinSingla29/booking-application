@@ -2,11 +2,8 @@ package com.example.catalog.controller;
 
 import com.example.catalog.BaseTest;
 import com.example.catalog.domain.jpa.*;
-import com.example.catalog.enumeration.SeatInventoryStatus;
-import com.example.catalog.enumeration.SeatType;
 import com.example.catalog.enumeration.ShowStatus;
 import com.example.catalog.repository.jpa.*;
-import com.example.catalog.transfer.client.SeatHoldRequest;
 import com.example.catalog.transfer.show.ShowListingRequest;
 import com.example.catalog.transfer.show.ShowSaveRequest;
 import com.example.catalog.transfer.show.ShowUpdateRequest;
@@ -20,7 +17,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -190,95 +186,4 @@ public class ShowControllerTest extends BaseTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(5));
     }
-
-    @Test
-    void testHoldSeats_Success() throws Exception {
-        // Create a seat for the screen using the constructor
-        SeatLayoutDefinition seat = new SeatLayoutDefinition(screen, "A1", SeatType.REGULAR, 1, 1);
-        screen.getSeatLayoutDefinitions().add(seat);
-
-        // Save screen and seat
-        screenRepository.save(screen);
-
-        // Create SeatInventoryEntry for the show
-        SeatInventoryEntry entry = new SeatInventoryEntry();
-        entry.setShow(show);
-        entry.setSeatLayoutDefinition(seat);
-        entry.setSeatInventoryStatus(SeatInventoryStatus.AVAILABLE);
-
-        // Save entry
-        seatInventoryEntryRepository.save(entry);
-
-        // Prepare request
-        SeatHoldRequest req = new SeatHoldRequest();
-        req.setShowSystemCode(show.getSystemCode());
-        req.setSeatCodes(List.of("A1"));
-        req.setBookingSystemCode("BOOK123");
-
-        mockMvc.perform(post("/catalog/shows/hold-seats")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("SUCCESS"))
-                .andExpect(jsonPath("$.seatCodes[0]").value("A1"))
-                .andExpect(jsonPath("$.bookingSystemCode").value("BOOK123"));
-    }
-
-    @Test
-    void testHoldSeats_ShowNotFound() throws Exception {
-        SeatHoldRequest req = new SeatHoldRequest();
-        req.setShowSystemCode("INVALID_SHOW");
-        req.setSeatCodes(List.of("A1"));
-        req.setBookingSystemCode("BOOK123");
-
-        mockMvc.perform(post("/catalog/shows/hold-seats")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("FAILURE"))
-                .andExpect(jsonPath("$.message").value("Show not found"));
-    }
-
-    @Test
-    void testHoldSeats_SeatNotFound() throws Exception {
-        // No seat "A2" exists
-        SeatHoldRequest req = new SeatHoldRequest();
-        req.setShowSystemCode(show.getSystemCode());
-        req.setSeatCodes(List.of("A2"));
-        req.setBookingSystemCode("BOOK123");
-
-        mockMvc.perform(post("/catalog/shows/hold-seats")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("FAILURE"))
-                .andExpect(jsonPath("$.message").value("Some seats not found"));
-    }
-
-    @Test
-    void testHoldSeats_SeatNotAvailable() throws Exception {
-        // Create seat and entry, but mark as HOLD
-        SeatLayoutDefinition seat = new SeatLayoutDefinition(screen, "A3", SeatType.REGULAR, 1, 2);
-        screen.getSeatLayoutDefinitions().add(seat);
-        screenRepository.save(screen);
-
-        SeatInventoryEntry entry = new SeatInventoryEntry();
-        entry.setShow(show);
-        entry.setSeatLayoutDefinition(seat);
-        entry.setSeatInventoryStatus(SeatInventoryStatus.HOLD);
-        seatInventoryEntryRepository.save(entry);
-
-        SeatHoldRequest req = new SeatHoldRequest();
-        req.setShowSystemCode(show.getSystemCode());
-        req.setSeatCodes(List.of("A3"));
-        req.setBookingSystemCode("BOOK123");
-
-        mockMvc.perform(post("/catalog/shows/hold-seats")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("FAILURE"))
-                .andExpect(jsonPath("$.message").value("Some seats are not available"));
-    }
-    
 }
