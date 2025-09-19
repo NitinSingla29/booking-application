@@ -14,6 +14,9 @@ import java.time.LocalDateTime;
 @Setter
 public class SeatInventoryEntry extends SystemCodedRelationEntity {
 
+    @Column(name = "booking_system_code", nullable = true)
+    private String bookingSystemCode;
+
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "show_id")
     private Show show;
@@ -29,7 +32,5 @@ public class SeatInventoryEntry extends SystemCodedRelationEntity {
     @Column(name = "hold_expires_at", nullable = true)
     private LocalDateTime holdExpiresAt;
 
-    @Column(name = "booking_system_code", nullable = true)
-    private String bookingSystemCode;
 
 }

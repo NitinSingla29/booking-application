@@ -27,10 +27,10 @@ public class SeatLayoutDefinition extends SystemCodedRelationEntity {
     @Enumerated(EnumType.STRING)
     private SeatType seatType;
 
-    @Column(name = "row_number")
+    @Column(name = "row_num")
     private int rowNumber;
 
-    @Column(name = "column_number")
+    @Column(name = "column_num")
     private int columnNumber;
 
     public SeatLayoutDefinition(Screen screen, String seatCode, SeatType seatType, int rowNumber, int columnNumber) {

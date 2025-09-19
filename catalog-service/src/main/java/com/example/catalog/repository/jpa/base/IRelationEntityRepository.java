@@ -1,4 +1,4 @@
-package com.example.catalog.repository.jpa;
+package com.example.catalog.repository.jpa.base;
 
 import com.example.catalog.domain.jpa.base.RelationEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
