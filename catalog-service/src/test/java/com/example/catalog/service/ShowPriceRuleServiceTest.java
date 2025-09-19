@@ -4,7 +4,7 @@ package com.example.catalog.service;
 import com.example.catalog.BaseTest;
 import com.example.catalog.enumeration.SeatType;
 import com.example.catalog.transfer.show.price.ShowPriceRuleCreateRequest;
-import com.example.catalog.transfer.show.price.ShowPriceRuleDeleteRequest;
+import com.example.catalog.transfer.show.price.ShowPriceRuleCreateResponse;
 import com.example.catalog.transfer.show.price.ShowPriceRuleUpdateRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,12 +31,12 @@ public class ShowPriceRuleServiceTest extends BaseTest {
         request.setCurrency(Currency.getInstance("USD"));
 
         var response = showPriceRuleService.createShowPriceRule(request);
-        assertNotNull(response.getId());
+        assertNotNull(response.getRuleSystemCode());
         assertEquals("ShowPriceRule created", response.getMessage());
     }
 
     @Test
-    void testGetShowPriceRuleById_Found() {
+    void testGetShowPriceRule_Found() {
         ShowPriceRuleCreateRequest createRequest = new ShowPriceRuleCreateRequest();
         createRequest.setShowSystemCode(TEST_SHOW_SYSTEM_CODE);
         createRequest.setSeatType(SeatType.REGULAR);
@@ -44,7 +44,7 @@ public class ShowPriceRuleServiceTest extends BaseTest {
         createRequest.setCurrency(Currency.getInstance("USD"));
         var createResponse = showPriceRuleService.createShowPriceRule(createRequest);
 
-        var response = showPriceRuleService.getShowPriceRuleById(createResponse.getId());
+        var response = showPriceRuleService.getShowPriceRule(createResponse.getRuleSystemCode());
         assertEquals(TEST_SHOW_SYSTEM_CODE, response.getShowSystemCode());
         assertEquals(SeatType.REGULAR, response.getSeatType());
         assertEquals(BigDecimal.valueOf(100), response.getPrice());
@@ -52,8 +52,8 @@ public class ShowPriceRuleServiceTest extends BaseTest {
     }
 
     @Test
-    void testGetShowPriceRuleById_NotFound() {
-        var response = showPriceRuleService.getShowPriceRuleById(-1L);
+    void testGetShowPriceRule_NotFound() {
+        var response = showPriceRuleService.getShowPriceRule("NONEXISTENT");
         assertEquals("ShowPriceRule not found", response.getMessage());
     }
 
@@ -95,23 +95,15 @@ public class ShowPriceRuleServiceTest extends BaseTest {
         createRequest.setSeatType(SeatType.REGULAR);
         createRequest.setPrice(BigDecimal.valueOf(100));
         createRequest.setCurrency(Currency.getInstance("USD"));
-        showPriceRuleService.createShowPriceRule(createRequest);
+        ShowPriceRuleCreateResponse showPriceRule = showPriceRuleService.createShowPriceRule(createRequest);
 
-        ShowPriceRuleDeleteRequest deleteRequest = new ShowPriceRuleDeleteRequest();
-        deleteRequest.setShowSystemCode(TEST_SHOW_SYSTEM_CODE);
-        deleteRequest.setSeatType(SeatType.REGULAR);
-
-        var response = showPriceRuleService.deleteShowPriceRule(deleteRequest);
+        var response = showPriceRuleService.deleteShowPriceRule(showPriceRule.getRuleSystemCode());
         assertEquals("ShowPriceRule deleted", response.getMessage());
     }
 
     @Test
     void testDeleteShowPriceRule_NotFound() {
-        ShowPriceRuleDeleteRequest deleteRequest = new ShowPriceRuleDeleteRequest();
-        deleteRequest.setShowSystemCode("NONEXISTENT");
-        deleteRequest.setSeatType(SeatType.PREMIUM);
-
-        var response = showPriceRuleService.deleteShowPriceRule(deleteRequest);
+        var response = showPriceRuleService.deleteShowPriceRule("NONEXISTENT");
         assertEquals("ShowPriceRule not found", response.getMessage());
     }
 }

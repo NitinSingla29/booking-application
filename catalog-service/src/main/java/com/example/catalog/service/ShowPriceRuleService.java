@@ -1,6 +1,7 @@
 package com.example.catalog.service;
 
 import com.example.catalog.domain.jpa.ShowPriceRule;
+import com.example.catalog.enumeration.OperationStatus;
 import com.example.catalog.repository.jpa.IShowPriceRuleRepository;
 import com.example.catalog.transfer.show.price.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,14 +20,14 @@ public class ShowPriceRuleService {
                 request.getPrice(),
                 request.getCurrency()
         );
-        ShowPriceRule saved = showPriceRuleRepository.save(rule);
-        return new ShowPriceRuleCreateResponse(saved.getId(), "ShowPriceRule created");
+        ShowPriceRule savedRule = showPriceRuleRepository.save(rule);
+        return new ShowPriceRuleCreateResponse(savedRule.getSystemCode(), OperationStatus.SUCCESS, "ShowPriceRule created");
     }
 
-    public ShowPriceRuleResponse getShowPriceRuleById(Long id) {
-        return showPriceRuleRepository.findById(id)
+    public ShowPriceRuleResponse getShowPriceRule(String ruleSystemCode) {
+        return showPriceRuleRepository.findBySystemCode(ruleSystemCode)
                 .map(this::toResponse)
-                .orElse(new ShowPriceRuleResponse("ShowPriceRule not found"));
+                .orElse(new ShowPriceRuleResponse(OperationStatus.FAILURE, "ShowPriceRule not found"));
     }
 
     public ShowPriceRuleUpdateResponse updateShowPriceRule(ShowPriceRuleUpdateRequest request) {
@@ -46,21 +47,21 @@ public class ShowPriceRuleService {
     }
 
 
-    public ShowPriceRuleDeleteResponse deleteShowPriceRule(ShowPriceRuleDeleteRequest request) {
-        ShowPriceRule rule = showPriceRuleRepository
-                .findByShowSystemCodeAndSeatType(request.getShowSystemCode(), request.getSeatType())
+    public ShowPriceRuleDeleteResponse deleteShowPriceRule(String ruleSystemCode) {
+        ShowPriceRule rule = showPriceRuleRepository.findBySystemCode(ruleSystemCode)
                 .orElse(null);
 
         if (rule == null) {
-            return new ShowPriceRuleDeleteResponse("ShowPriceRule not found");
+            return new ShowPriceRuleDeleteResponse(OperationStatus.FAILURE, "ShowPriceRule not found");
         }
 
         showPriceRuleRepository.delete(rule);
-        return new ShowPriceRuleDeleteResponse("ShowPriceRule deleted");
+        return new ShowPriceRuleDeleteResponse(OperationStatus.SUCCESS, "ShowPriceRule deleted");
     }
 
     private ShowPriceRuleResponse toResponse(ShowPriceRule rule) {
         ShowPriceRuleResponse response = new ShowPriceRuleResponse();
+        response.setRuleSystemCode(rule.getSystemCode());
         response.setShowSystemCode(rule.getShowSystemCode());
         response.setSeatType(rule.getSeatType());
         response.setPrice(rule.getPrice());

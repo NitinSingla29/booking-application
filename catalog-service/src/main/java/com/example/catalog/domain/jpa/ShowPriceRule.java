@@ -1,6 +1,6 @@
 package com.example.catalog.domain.jpa;
 
-import com.example.catalog.domain.jpa.base.RelationEntity;
+import com.example.catalog.domain.jpa.base.SystemCodedRelationEntity;
 import com.example.catalog.enumeration.SeatType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,7 +14,7 @@ import java.util.Currency;
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class ShowPriceRule extends RelationEntity {
+public class ShowPriceRule extends SystemCodedRelationEntity {
 
     @Column(name = "show_system_Code", nullable = false)
     private String showSystemCode;

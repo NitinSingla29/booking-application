@@ -1,11 +1,13 @@
 package com.example.catalog.transfer.show.price;
 
+import com.example.catalog.enumeration.OperationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
 public class ShowPriceRuleCreateResponse {
-    private Long id;
+    private String ruleSystemCode;
+    private OperationStatus status;
     private String message;
 }
