@@ -3,6 +3,8 @@ package com.example.catalog.controller;
 import com.example.catalog.service.SeatInventoryService;
 import com.example.catalog.transfer.client.SeatHoldRequest;
 import com.example.catalog.transfer.client.SeatHoldResponse;
+import com.example.catalog.transfer.client.SeatReleaseRequest;
+import com.example.catalog.transfer.client.SeatReleaseResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,4 +24,11 @@ public class SeatInventoryController {
         SeatHoldResponse response = seatInventoryService.holdSeats(request);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/release-seats")
+    public ResponseEntity<SeatReleaseResponse> releaseSeats(@RequestBody SeatReleaseRequest request) {
+        SeatReleaseResponse response = seatInventoryService.releaseSeats(request);
+        return ResponseEntity.ok(response);
+    }
+
 }

@@ -7,6 +7,7 @@ import com.example.catalog.enumeration.SeatType;
 import com.example.catalog.enumeration.ShowStatus;
 import com.example.catalog.repository.jpa.*;
 import com.example.catalog.transfer.client.SeatHoldRequest;
+import com.example.catalog.transfer.client.SeatReleaseRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -159,4 +160,89 @@ public class SeatInventoryControllerTest extends BaseTest {
                 .andExpect(jsonPath("$.message").value("Some seats are not available"));
     }
 
+    @Test
+    void testReleaseSeats_NoSeatsFound() throws Exception {
+        var req = new SeatReleaseRequest("NON_EXISTENT_CODE");
+
+        mockMvc.perform(post("/catalog/inventory/seat/release-seats")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("FAILURE"))
+                .andExpect(jsonPath("$.message").value("No seats found for booking code"));
+    }
+
+    @Test
+    void testReleaseSeats_SeatsAlreadyReleased() throws Exception {
+        SeatLayoutDefinition seat = new SeatLayoutDefinition(screen, "B1", SeatType.REGULAR, 2, 1);
+        screen.getSeatLayoutDefinitions().add(seat);
+        screenRepository.save(screen);
+
+        SeatInventoryEntry entry = new SeatInventoryEntry();
+        entry.setShow(show);
+        entry.setSeatLayoutDefinition(seat);
+        entry.setSeatInventoryStatus(SeatInventoryStatus.AVAILABLE);
+        entry.setBookingSystemCode("BOOK456");
+        seatInventoryEntryRepository.save(entry);
+
+        var req = new SeatReleaseRequest();
+        req.setBookingSystemCode("BOOK456");
+
+        mockMvc.perform(post("/catalog/inventory/seat/release-seats")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("SEATS_ALREADY_RELEASED"))
+                .andExpect(jsonPath("$.message").value("Seats are already released"));
+    }
+
+    @Test
+    void testReleaseSeats_SeatsAreConfirmed() throws Exception {
+        SeatLayoutDefinition seat = new SeatLayoutDefinition(screen, "B2", SeatType.REGULAR, 2, 2);
+        screen.getSeatLayoutDefinitions().add(seat);
+        screenRepository.save(screen);
+
+        SeatInventoryEntry entry = new SeatInventoryEntry();
+        entry.setShow(show);
+        entry.setSeatLayoutDefinition(seat);
+        entry.setSeatInventoryStatus(SeatInventoryStatus.CONFIRMED);
+        entry.setBookingSystemCode("BOOK789");
+        seatInventoryEntryRepository.save(entry);
+
+        var req = new SeatReleaseRequest();
+        req.setBookingSystemCode("BOOK789");
+
+        mockMvc.perform(post("/catalog/inventory/seat/release-seats")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("SEATS_ARE_CONFIRMED"))
+                .andExpect(jsonPath("$.message").value("Seats are already confirmed"));
+    }
+
+    @Test
+    void testReleaseSeats_Success() throws Exception {
+        SeatLayoutDefinition seat = new SeatLayoutDefinition(screen, "B3", SeatType.REGULAR, 2, 3);
+        screen.getSeatLayoutDefinitions().add(seat);
+        screenRepository.save(screen);
+
+        SeatInventoryEntry entry = new SeatInventoryEntry();
+        entry.setShow(show);
+        entry.setSeatLayoutDefinition(seat);
+        entry.setSeatInventoryStatus(SeatInventoryStatus.HOLD);
+        entry.setBookingSystemCode("BOOK999");
+        seatInventoryEntryRepository.save(entry);
+
+        var req = new SeatReleaseRequest();
+        req.setBookingSystemCode("BOOK999");
+
+        mockMvc.perform(post("/catalog/inventory/seat/release-seats")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("SUCCESS"))
+                .andExpect(jsonPath("$.message").value("Seats released successfully"))
+                .andExpect(jsonPath("$.bookingSystemCode").value("BOOK999"))
+                .andExpect(jsonPath("$.seatCodes[0]").value("B3"));
+    }
 }
