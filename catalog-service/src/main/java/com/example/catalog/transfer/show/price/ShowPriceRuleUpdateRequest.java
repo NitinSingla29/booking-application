@@ -8,6 +8,7 @@ import java.util.Currency;
 
 @Data
 public class ShowPriceRuleUpdateRequest {
+    private String ruleSystemCode;
     private String showSystemCode;
     private SeatType seatType;
     private BigDecimal price;

@@ -32,18 +32,19 @@ public class ShowPriceRuleService {
 
     public ShowPriceRuleUpdateResponse updateShowPriceRule(ShowPriceRuleUpdateRequest request) {
         ShowPriceRule rule = showPriceRuleRepository
-                .findByShowSystemCodeAndSeatType(request.getShowSystemCode(), request.getSeatType())
+                .findBySystemCode(request.getRuleSystemCode())
                 .orElse(null);
 
         if (rule == null) {
-            return new ShowPriceRuleUpdateResponse("ShowPriceRule not found");
+            return new ShowPriceRuleUpdateResponse(OperationStatus.FAILURE, "ShowPriceRule not found");
         }
-
+        rule.setShowSystemCode(request.getShowSystemCode());
+        rule.setSeatType(request.getSeatType());
         rule.setPrice(request.getPrice());
         rule.setCurrency(request.getCurrency());
 
         ShowPriceRule saved = showPriceRuleRepository.save(rule);
-        return new ShowPriceRuleUpdateResponse("ShowPriceRule updated");
+        return new ShowPriceRuleUpdateResponse(OperationStatus.SUCCESS, "ShowPriceRule updated");
     }
 
 

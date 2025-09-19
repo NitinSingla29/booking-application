@@ -64,9 +64,10 @@ public class ShowPriceRuleServiceTest extends BaseTest {
         createRequest.setSeatType(SeatType.REGULAR);
         createRequest.setPrice(BigDecimal.valueOf(100));
         createRequest.setCurrency(Currency.getInstance("USD"));
-        showPriceRuleService.createShowPriceRule(createRequest);
+        ShowPriceRuleCreateResponse showPriceRule = showPriceRuleService.createShowPriceRule(createRequest);
 
         ShowPriceRuleUpdateRequest updateRequest = new ShowPriceRuleUpdateRequest();
+        updateRequest.setRuleSystemCode(showPriceRule.getRuleSystemCode());
         updateRequest.setShowSystemCode(TEST_SHOW_SYSTEM_CODE);
         updateRequest.setSeatType(SeatType.REGULAR);
         updateRequest.setPrice(BigDecimal.valueOf(150));

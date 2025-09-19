@@ -7,6 +7,7 @@ import com.example.catalog.enumeration.SeatType;
 import com.example.catalog.transfer.show.price.ShowPriceRuleCreateRequest;
 import com.example.catalog.transfer.show.price.ShowPriceRuleCreateResponse;
 import com.example.catalog.transfer.show.price.ShowPriceRuleUpdateRequest;
+import com.example.catalog.transfer.show.price.ShowPriceRuleUpdateResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,32 +63,38 @@ class ShowPriceRuleControllerTest extends BaseTest {
 
     @Test
     void testUpdateShowPriceRule() throws Exception {
-        // First, create a rule
+        // Create a rule first
         ShowPriceRuleCreateRequest createRequest = new ShowPriceRuleCreateRequest();
-        createRequest.setShowSystemCode("SHOW456");
-        createRequest.setSeatType(SeatType.PREMIUM);
-        createRequest.setPrice(BigDecimal.valueOf(200));
+        createRequest.setShowSystemCode("SHOW_UPD");
+        createRequest.setSeatType(SeatType.REGULAR);
+        createRequest.setPrice(BigDecimal.valueOf(50));
         createRequest.setCurrency(Currency.getInstance("USD"));
 
-        String createResponse = mockMvc.perform(post("/catalogue/price-rule")
+        String createResponseJson = mockMvc.perform(post("/catalogue/price-rule")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createRequest)))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        Long id = objectMapper.readTree(createResponse).get("id").asLong();
+        ShowPriceRuleCreateResponse createResponse = objectMapper.readValue(createResponseJson, ShowPriceRuleCreateResponse.class);
 
+        // Prepare update request
         ShowPriceRuleUpdateRequest updateRequest = new ShowPriceRuleUpdateRequest();
-        updateRequest.setShowSystemCode("SHOW456");
+        updateRequest.setRuleSystemCode(createResponse.getRuleSystemCode());
+        updateRequest.setShowSystemCode("SHOW_UPD");
         updateRequest.setSeatType(SeatType.PREMIUM);
-        updateRequest.setPrice(BigDecimal.valueOf(250));
+        updateRequest.setPrice(BigDecimal.valueOf(75));
         updateRequest.setCurrency(Currency.getInstance("USD"));
 
-        mockMvc.perform(put("/catalogue/price-rule/{id}", id)
+        String updateResponseJson = mockMvc.perform(put("/catalogue/price-rule")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.price").value(250));
+                .andReturn().getResponse().getContentAsString();
+
+        // Assert update response
+        ShowPriceRuleUpdateResponse updateResponse = objectMapper.readValue(updateResponseJson, ShowPriceRuleUpdateResponse.class);
+        assertEquals(OperationStatus.SUCCESS, updateResponse.getStatus());
     }
 
     @Test
