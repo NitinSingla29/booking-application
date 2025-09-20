@@ -1,5 +1,7 @@
 package com.example.catalog.service;
 
+import com.example.catalog.component.LockHandle;
+import com.example.catalog.component.LockManager;
 import com.example.catalog.domain.jpa.SeatInventoryEntry;
 import com.example.catalog.domain.jpa.Show;
 import com.example.catalog.enumeration.SeatInventoryStatus;
@@ -11,6 +13,7 @@ import com.example.catalog.transfer.client.SeatHoldRequest;
 import com.example.catalog.transfer.client.SeatHoldResponse;
 import com.example.catalog.transfer.client.SeatReleaseRequest;
 import com.example.catalog.transfer.client.SeatReleaseResponse;
+import jakarta.persistence.OptimisticLockException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class SeatInventoryService {
@@ -32,6 +36,9 @@ public class SeatInventoryService {
     @Value("${seat.hold.period.mins:5}")
     private int defaultSeatHoldPeriodMins;
 
+    @Autowired
+    private LockManager lockManager;
+
     @Transactional
     public SeatHoldResponse holdSeats(SeatHoldRequest request) {
         Optional<Show> showOpt = showRepository.findBySystemCode(request.getShowSystemCode());
@@ -44,7 +51,6 @@ public class SeatInventoryService {
         if (entries.size() != request.getSeatCodes().size()) {
             return new SeatHoldResponse(SeatReservationStatus.FAILURE, "Some seats not found");
         }
-
         for (SeatInventoryEntry entry : entries) {
             if (entry.getSeatInventoryStatus() != SeatInventoryStatus.AVAILABLE) {
                 return new SeatHoldResponse(SeatReservationStatus.FAILURE, "Some seats are not available");
@@ -52,15 +58,31 @@ public class SeatInventoryService {
         }
 
         LocalDateTime holdExpiresAt = LocalDateTime.now().plusMinutes(defaultSeatHoldPeriodMins);
-        for (SeatInventoryEntry entry : entries) {
-            entry.setSeatInventoryStatus(SeatInventoryStatus.HOLD);
-            entry.setBookingSystemCode(request.getBookingSystemCode());
-            entry.setShow(show);
-            entry.setHoldExpiresAt(holdExpiresAt);
+        List<String> lockKeys = getLockKeys(entries, request.getShowSystemCode());
+        LockHandle lockHandle = lockManager.acquireLocks(lockKeys);
+        try {
+            for (SeatInventoryEntry entry : entries) {
+                holdSeat(request.getBookingSystemCode(), entry, show, holdExpiresAt);
+            }
+
+            seatInventoryEntryRepository.saveAllAndFlush(entries);
+
+            return getSeatHoldResponse(request, entries, show);
+        } catch (OptimisticLockException e) {
+            return new SeatHoldResponse(SeatReservationStatus.FAILURE, "Seats are already acquired by another transaction");
+        } finally {
+            lockManager.releaseLock(lockHandle);
         }
-        seatInventoryEntryRepository.saveAllAndFlush(entries);
+    }
 
+    private static void holdSeat(String bookingSystemCode, SeatInventoryEntry entry, Show show, LocalDateTime holdExpiresAt) {
+        entry.setSeatInventoryStatus(SeatInventoryStatus.HOLD);
+        entry.setBookingSystemCode(bookingSystemCode);
+        entry.setShow(show);
+        entry.setHoldExpiresAt(holdExpiresAt);
+    }
 
+    private static SeatHoldResponse getSeatHoldResponse(SeatHoldRequest request, List<SeatInventoryEntry> entries, Show show) {
         SeatHoldResponse seatsReservedSuccessfully = new SeatHoldResponse(SeatReservationStatus.SUCCESS, "Seats reserved successfully");
         seatsReservedSuccessfully.setSeatCodes(entries.stream().map(e -> e.getSeatLayoutDefinition().getSeatCode()).toList());
         seatsReservedSuccessfully.setBookingSystemCode(request.getBookingSystemCode());
@@ -115,6 +137,12 @@ public class SeatInventoryService {
                 .map(e -> e.getSeatLayoutDefinition().getSeatCode())
                 .toList());
         return resp;
+    }
+
+    private static List<String> getLockKeys(List<SeatInventoryEntry> seatInventoryEntries, String showSystemCode) {
+        return seatInventoryEntries.stream().map(e -> e.getSeatLayoutDefinition().getSeatCode())
+                .map(s -> "show:" + showSystemCode + ":seat:" + s)
+                .collect(Collectors.toList());
     }
 
 
