@@ -34,6 +34,7 @@ class ShowPricingServiceTest extends BaseTest {
         showPriceRuleRepository.save(rule);
 
         ShowPriceCalculationRequest request = new ShowPriceCalculationRequest();
+        request.setUserSystemCode("USER456");
         request.setShowSystemCode("SHOW123");
         request.setSeatType(SeatType.REGULAR);
         request.setQuantity(3);
@@ -48,6 +49,7 @@ class ShowPricingServiceTest extends BaseTest {
     @Test
     void testCalculateShowPrice_NotFound() {
         ShowPriceCalculationRequest request = new ShowPriceCalculationRequest();
+        request.setUserSystemCode("USER456");
         request.setShowSystemCode("NONEXISTENT");
         request.setSeatType(SeatType.PREMIUM);
         request.setQuantity(2);

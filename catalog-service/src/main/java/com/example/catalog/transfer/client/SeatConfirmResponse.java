@@ -1,20 +1,18 @@
 package com.example.catalog.transfer.client;
 
 import com.example.catalog.enumeration.OperationStatus;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
-public class SeatHoldRequest {
-    private String showSystemCode;
-    private List<String> seatCodes;
+public class SeatConfirmResponse {
     private String bookingSystemCode;
-    private String userSystemCode;
     private OperationStatus status;
+    private String message;
 
+    public SeatConfirmResponse(OperationStatus status, String message) {
+        this.status = status;
+        this.message = message;
+    }
 }

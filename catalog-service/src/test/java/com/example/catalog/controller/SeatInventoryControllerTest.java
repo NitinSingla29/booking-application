@@ -6,6 +6,7 @@ import com.example.catalog.enumeration.SeatInventoryStatus;
 import com.example.catalog.enumeration.SeatType;
 import com.example.catalog.enumeration.ShowStatus;
 import com.example.catalog.repository.jpa.*;
+import com.example.catalog.transfer.client.SeatConfirmRequest;
 import com.example.catalog.transfer.client.SeatHoldRequest;
 import com.example.catalog.transfer.client.SeatReleaseRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class SeatInventoryControllerTest extends BaseTest {
 
+    public static final String INVENTORY_URL_PREFIX = "/inventory/seat";
     @Autowired
     private MockMvc mockMvc;
 
@@ -94,7 +96,7 @@ public class SeatInventoryControllerTest extends BaseTest {
         req.setSeatCodes(List.of("A1"));
         req.setBookingSystemCode("BOOK123");
 
-        mockMvc.perform(post("/catalog/inventory/seat/hold-seats")
+        mockMvc.perform(post(INVENTORY_URL_PREFIX + "/hold-seats")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
@@ -110,7 +112,7 @@ public class SeatInventoryControllerTest extends BaseTest {
         req.setSeatCodes(List.of("A1"));
         req.setBookingSystemCode("BOOK123");
 
-        mockMvc.perform(post("/catalog/inventory/seat/hold-seats")
+        mockMvc.perform(post(INVENTORY_URL_PREFIX + "/hold-seats")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
@@ -126,7 +128,7 @@ public class SeatInventoryControllerTest extends BaseTest {
         req.setSeatCodes(List.of("A2"));
         req.setBookingSystemCode("BOOK123");
 
-        mockMvc.perform(post("/catalog/inventory/seat/hold-seats")
+        mockMvc.perform(post(INVENTORY_URL_PREFIX + "/hold-seats")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
@@ -152,7 +154,7 @@ public class SeatInventoryControllerTest extends BaseTest {
         req.setSeatCodes(List.of("A3"));
         req.setBookingSystemCode("BOOK123");
 
-        mockMvc.perform(post("/catalog/inventory/seat/hold-seats")
+        mockMvc.perform(post(INVENTORY_URL_PREFIX + "/hold-seats")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
@@ -164,7 +166,7 @@ public class SeatInventoryControllerTest extends BaseTest {
     void testReleaseSeats_NoSeatsFound() throws Exception {
         var req = new SeatReleaseRequest("NON_EXISTENT_CODE");
 
-        mockMvc.perform(post("/catalog/inventory/seat/release-seats")
+        mockMvc.perform(post(INVENTORY_URL_PREFIX + "/release-seats")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
@@ -188,7 +190,7 @@ public class SeatInventoryControllerTest extends BaseTest {
         var req = new SeatReleaseRequest();
         req.setBookingSystemCode("BOOK456");
 
-        mockMvc.perform(post("/catalog/inventory/seat/release-seats")
+        mockMvc.perform(post(INVENTORY_URL_PREFIX + "/release-seats")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
@@ -212,7 +214,7 @@ public class SeatInventoryControllerTest extends BaseTest {
         var req = new SeatReleaseRequest();
         req.setBookingSystemCode("BOOK789");
 
-        mockMvc.perform(post("/catalog/inventory/seat/release-seats")
+        mockMvc.perform(post(INVENTORY_URL_PREFIX + "/release-seats")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
@@ -236,7 +238,7 @@ public class SeatInventoryControllerTest extends BaseTest {
         var req = new SeatReleaseRequest();
         req.setBookingSystemCode("BOOK999");
 
-        mockMvc.perform(post("/catalog/inventory/seat/release-seats")
+        mockMvc.perform(post(INVENTORY_URL_PREFIX + "/release-seats")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
@@ -244,5 +246,68 @@ public class SeatInventoryControllerTest extends BaseTest {
                 .andExpect(jsonPath("$.message").value("Seats released successfully"))
                 .andExpect(jsonPath("$.bookingSystemCode").value("BOOK999"))
                 .andExpect(jsonPath("$.seatCodes[0]").value("B3"));
+    }
+
+    @Test
+    void testConfirmSeats_NoSeatsFound() throws Exception {
+        var req = new SeatConfirmRequest("NON_EXISTENT_CODE");
+
+        mockMvc.perform(post(INVENTORY_URL_PREFIX + "/confirm-seats")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("FAILURE"))
+                .andExpect(jsonPath("$.message").value("No seats found for booking code"));
+    }
+
+    @Test
+    void testConfirmSeats_SeatsNotHold() throws Exception {
+        // Create seat and entry, mark as AVAILABLE
+        SeatLayoutDefinition seat = new SeatLayoutDefinition(screen, "C1", SeatType.REGULAR, 3, 1);
+        screen.getSeatLayoutDefinitions().add(seat);
+        screenRepository.save(screen);
+
+        SeatInventoryEntry entry = new SeatInventoryEntry();
+        entry.setShow(show);
+        entry.setSeatLayoutDefinition(seat);
+        entry.setSeatInventoryStatus(SeatInventoryStatus.AVAILABLE);
+        entry.setBookingSystemCode("BOOK321");
+        seatInventoryEntryRepository.save(entry);
+
+        var req = new SeatConfirmRequest();
+        req.setBookingSystemCode("BOOK321");
+
+        mockMvc.perform(post(INVENTORY_URL_PREFIX + "/confirm-seats")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("FAILURE"))
+                .andExpect(jsonPath("$.message").value("Seats must be in hold state before confirmation"));
+    }
+
+    @Test
+    void testConfirmSeats_Success() throws Exception {
+        // Create seat and entry, mark as HOLD
+        SeatLayoutDefinition seat = new SeatLayoutDefinition(screen, "C2", SeatType.REGULAR, 3, 2);
+        screen.getSeatLayoutDefinitions().add(seat);
+        screenRepository.save(screen);
+
+        SeatInventoryEntry entry = new SeatInventoryEntry();
+        entry.setShow(show);
+        entry.setSeatLayoutDefinition(seat);
+        entry.setSeatInventoryStatus(SeatInventoryStatus.HOLD);
+        entry.setBookingSystemCode("BOOK654");
+        seatInventoryEntryRepository.save(entry);
+
+        var req = new SeatConfirmRequest();
+        req.setBookingSystemCode("BOOK654");
+
+        mockMvc.perform(post(INVENTORY_URL_PREFIX + "/confirm-seats")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("SUCCESS"))
+                .andExpect(jsonPath("$.message").value("Seats confirmed successfully"))
+                .andExpect(jsonPath("$.bookingSystemCode").value("BOOK654"));
     }
 }

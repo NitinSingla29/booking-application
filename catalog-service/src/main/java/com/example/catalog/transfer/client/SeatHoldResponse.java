@@ -1,6 +1,7 @@
 package com.example.catalog.transfer.client;
 
-import com.example.catalog.enumeration.SeatReservationStatus;
+import com.example.catalog.enumeration.OperationStatus;
+import com.example.catalog.enumeration.SeatType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,11 +17,12 @@ public class SeatHoldResponse {
     private String screenSystemCode;
     private String movieSystemCode;
     private LocalDate showDate;
+    private SeatType seatType;
     private List<String> seatCodes;
-    private SeatReservationStatus status;
+    private OperationStatus status;
     private String message;
 
-    public SeatHoldResponse(SeatReservationStatus status, String message) {
+    public SeatHoldResponse(OperationStatus status, String message) {
         this.status = status;
         this.message = message;
     }

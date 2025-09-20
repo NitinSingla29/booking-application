@@ -29,6 +29,9 @@ public class SeatInventoryEntry extends SystemCodedRelationEntity {
     @Enumerated(EnumType.STRING)
     private SeatInventoryStatus seatInventoryStatus;
 
+    @Column(name = "booked_by", nullable = true)
+    private String bookedBy;
+
     @Column(name = "hold_expires_at", nullable = true)
     private LocalDateTime holdExpiresAt;
 

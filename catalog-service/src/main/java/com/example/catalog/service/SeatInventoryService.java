@@ -4,15 +4,12 @@ import com.example.catalog.component.LockHandle;
 import com.example.catalog.component.LockManager;
 import com.example.catalog.domain.jpa.SeatInventoryEntry;
 import com.example.catalog.domain.jpa.Show;
+import com.example.catalog.enumeration.OperationStatus;
 import com.example.catalog.enumeration.SeatInventoryStatus;
 import com.example.catalog.enumeration.SeatReleaseStatus;
-import com.example.catalog.enumeration.SeatReservationStatus;
 import com.example.catalog.repository.jpa.ISeatInventoryEntryRepository;
 import com.example.catalog.repository.jpa.IShowRepository;
-import com.example.catalog.transfer.client.SeatHoldRequest;
-import com.example.catalog.transfer.client.SeatHoldResponse;
-import com.example.catalog.transfer.client.SeatReleaseRequest;
-import com.example.catalog.transfer.client.SeatReleaseResponse;
+import com.example.catalog.transfer.client.*;
 import jakarta.persistence.OptimisticLockException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,17 +40,17 @@ public class SeatInventoryService {
     public SeatHoldResponse holdSeats(SeatHoldRequest request) {
         Optional<Show> showOpt = showRepository.findBySystemCode(request.getShowSystemCode());
         if (showOpt.isEmpty()) {
-            return new SeatHoldResponse(SeatReservationStatus.FAILURE, "Show not found");
+            return new SeatHoldResponse(OperationStatus.FAILURE, "Show not found");
         }
         Show show = showOpt.get();
 
         List<SeatInventoryEntry> entries = seatInventoryEntryRepository.findByShowAndSeatLayoutDefinition_SeatCodeIn(show, request.getSeatCodes());
         if (entries.size() != request.getSeatCodes().size()) {
-            return new SeatHoldResponse(SeatReservationStatus.FAILURE, "Some seats not found");
+            return new SeatHoldResponse(OperationStatus.FAILURE, "Some seats not found");
         }
         for (SeatInventoryEntry entry : entries) {
             if (entry.getSeatInventoryStatus() != SeatInventoryStatus.AVAILABLE) {
-                return new SeatHoldResponse(SeatReservationStatus.FAILURE, "Some seats are not available");
+                return new SeatHoldResponse(OperationStatus.FAILURE, "Some seats are not available");
             }
         }
 
@@ -62,34 +59,36 @@ public class SeatInventoryService {
         LockHandle lockHandle = lockManager.acquireLocks(lockKeys);
         try {
             for (SeatInventoryEntry entry : entries) {
-                holdSeat(request.getBookingSystemCode(), entry, show, holdExpiresAt);
+                holdSeat(request.getBookingSystemCode(), request.getUserSystemCode(), entry, show, holdExpiresAt);
             }
 
             seatInventoryEntryRepository.saveAllAndFlush(entries);
 
             return getSeatHoldResponse(request, entries, show);
         } catch (OptimisticLockException e) {
-            return new SeatHoldResponse(SeatReservationStatus.FAILURE, "Seats are already acquired by another transaction");
+            return new SeatHoldResponse(OperationStatus.FAILURE, "Seats are already acquired by another transaction");
         } finally {
             lockManager.releaseLock(lockHandle);
         }
     }
 
-    private static void holdSeat(String bookingSystemCode, SeatInventoryEntry entry, Show show, LocalDateTime holdExpiresAt) {
+    private static void holdSeat(String bookingSystemCode, String userSystemCode, SeatInventoryEntry entry, Show show, LocalDateTime holdExpiresAt) {
         entry.setSeatInventoryStatus(SeatInventoryStatus.HOLD);
         entry.setBookingSystemCode(bookingSystemCode);
         entry.setShow(show);
+        entry.setBookedBy(userSystemCode);
         entry.setHoldExpiresAt(holdExpiresAt);
     }
 
     private static SeatHoldResponse getSeatHoldResponse(SeatHoldRequest request, List<SeatInventoryEntry> entries, Show show) {
-        SeatHoldResponse seatsReservedSuccessfully = new SeatHoldResponse(SeatReservationStatus.SUCCESS, "Seats reserved successfully");
+        SeatHoldResponse seatsReservedSuccessfully = new SeatHoldResponse(OperationStatus.SUCCESS, "Seats reserved successfully");
         seatsReservedSuccessfully.setSeatCodes(entries.stream().map(e -> e.getSeatLayoutDefinition().getSeatCode()).toList());
         seatsReservedSuccessfully.setBookingSystemCode(request.getBookingSystemCode());
         seatsReservedSuccessfully.setShowSystemCode(request.getShowSystemCode());
         seatsReservedSuccessfully.setScreenSystemCode(show.getScreen().getSystemCode());
         seatsReservedSuccessfully.setScreenSystemCode(show.getTheatre().getSystemCode());
         seatsReservedSuccessfully.setMovieSystemCode(show.getMovie().getSystemCode());
+        seatsReservedSuccessfully.setSeatType(entries.getFirst().getSeatLayoutDefinition().getSeatType());
         return seatsReservedSuccessfully;
     }
 
@@ -126,6 +125,7 @@ public class SeatInventoryService {
             entry.setSeatInventoryStatus(SeatInventoryStatus.AVAILABLE);
             entry.setBookingSystemCode(null);
             entry.setHoldExpiresAt(null);
+            entry.setBookedBy(null);
         }
         seatInventoryEntryRepository.saveAllAndFlush(heldEntries);
 
@@ -136,6 +136,35 @@ public class SeatInventoryService {
         resp.setSeatCodes(heldEntries.stream()
                 .map(e -> e.getSeatLayoutDefinition().getSeatCode())
                 .toList());
+        return resp;
+    }
+
+    @Transactional
+    public SeatConfirmResponse confirmSeats(SeatConfirmRequest seatConfirmRequest) {
+        List<SeatInventoryEntry> entries = seatInventoryEntryRepository
+                .findByBookingSystemCode(seatConfirmRequest.getBookingSystemCode());
+
+        if (entries.isEmpty()) {
+            return new SeatConfirmResponse(OperationStatus.FAILURE, "No seats found for booking code");
+        }
+
+        boolean allHold = entries.stream()
+                .allMatch(e -> e.getSeatInventoryStatus() == SeatInventoryStatus.HOLD);
+
+        if (!allHold) {
+            return new SeatConfirmResponse(OperationStatus.FAILURE, "Seats must be in hold state before confirmation");
+        }
+
+        for (SeatInventoryEntry entry : entries) {
+            entry.setSeatInventoryStatus(SeatInventoryStatus.CONFIRMED);
+            entry.setHoldExpiresAt(null);
+        }
+        seatInventoryEntryRepository.saveAllAndFlush(entries);
+
+        SeatConfirmResponse resp = new SeatConfirmResponse();
+        resp.setStatus(OperationStatus.SUCCESS);
+        resp.setMessage("Seats confirmed successfully");
+        resp.setBookingSystemCode(seatConfirmRequest.getBookingSystemCode());
         return resp;
     }
 

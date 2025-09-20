@@ -6,6 +6,8 @@ import com.example.catalog.enumeration.SeatInventoryStatus;
 import com.example.catalog.enumeration.SeatType;
 import com.example.catalog.enumeration.ShowStatus;
 import com.example.catalog.repository.jpa.*;
+import com.example.catalog.transfer.client.SeatConfirmRequest;
+import com.example.catalog.transfer.client.SeatConfirmResponse;
 import com.example.catalog.transfer.client.SeatHoldRequest;
 import com.example.catalog.transfer.client.SeatReleaseRequest;
 import com.example.catalog.transfer.show.ShowResponse;
@@ -205,6 +207,57 @@ public class SeatInventoryServiceTest extends BaseTest {
         assertEquals("BOOK123", resp.getBookingSystemCode());
         assertEquals(List.of(entry.getSeatLayoutDefinition().getSeatCode()), resp.getSeatCodes());
     }
+
+    @Test
+    void testConfirmSeats_NoSeatsFound() {
+        var req = new SeatConfirmRequest();
+        req.setBookingSystemCode("NON_EXISTENT_CODE");
+
+        var resp = seatInventoryService.confirmSeats(req);
+        assertEquals("FAILURE", resp.getStatus().name());
+        assertEquals("No seats found for booking code", resp.getMessage());
+    }
+
+    @Test
+    void testConfirmSeats_SeatsNotHold() {
+        ShowResponse show = createShow(movie1, screen1, theatre1, LocalDate.now(), ShowStatus.SCHEDULED);
+        Show savedShow = showRepository.findBySystemCode(show.getSystemCode()).orElseThrow();
+        List<SeatInventoryEntry> entries = seatInventoryEntryRepository.findByShow(savedShow);
+
+        // Mark one seat as AVAILABLE and set booking code
+        SeatInventoryEntry entry = entries.get(0);
+        entry.setSeatInventoryStatus(SeatInventoryStatus.AVAILABLE);
+        entry.setBookingSystemCode("BOOK123");
+        seatInventoryEntryRepository.save(entry);
+
+        var req = new SeatConfirmRequest();
+        req.setBookingSystemCode("BOOK123");
+
+        var resp = seatInventoryService.confirmSeats(req);
+        assertEquals("FAILURE", resp.getStatus().name());
+        assertEquals("Seats must be in hold state before confirmation", resp.getMessage());
+    }
+
+    @Test
+    void testConfirmSeats_Success() {
+        ShowResponse show = createShow(movie1, screen1, theatre1, LocalDate.now(), ShowStatus.SCHEDULED);
+        Show savedShow = showRepository.findBySystemCode(show.getSystemCode()).orElseThrow();
+        List<SeatInventoryEntry> entries = seatInventoryEntryRepository.findByShow(savedShow);
+
+        // Mark one seat as HOLD and set booking code
+        SeatInventoryEntry entry = entries.get(0);
+        entry.setSeatInventoryStatus(SeatInventoryStatus.HOLD);
+        entry.setBookingSystemCode("BOOK123");
+        seatInventoryEntryRepository.save(entry);
+
+        SeatConfirmRequest req = new SeatConfirmRequest("BOOK123");
+
+        SeatConfirmResponse resp = seatInventoryService.confirmSeats(req);
+        assertEquals("SUCCESS", resp.getStatus().name());
+        assertEquals("Seats confirmed successfully", resp.getMessage());
+        assertEquals("BOOK123", resp.getBookingSystemCode());
+    }
+
 
     private Screen createScreenWithSeats(String name, Theatre theatre) {
         Screen screen = new Screen();
