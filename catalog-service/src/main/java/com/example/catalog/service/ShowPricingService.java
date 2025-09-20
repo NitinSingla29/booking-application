@@ -1,6 +1,6 @@
 package com.example.catalog.service;
 
-import com.example.catalog.enumeration.OperationStatus;
+import com.example.booking.enumeration.OperationStatus;
 import com.example.catalog.repository.jpa.IShowPriceRuleRepository;
 import com.example.catalog.transfer.show.price.ShowPriceCalculationRequest;
 import com.example.catalog.transfer.show.price.ShowPriceCalculationResponse;

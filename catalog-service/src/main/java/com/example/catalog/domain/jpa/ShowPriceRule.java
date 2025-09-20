@@ -1,7 +1,7 @@
 package com.example.catalog.domain.jpa;
 
+import com.example.booking.enumeration.SeatType;
 import com.example.catalog.domain.jpa.base.SystemCodedRelationEntity;
-import com.example.catalog.enumeration.SeatType;
 import jakarta.persistence.*;
 import lombok.*;
 

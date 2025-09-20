@@ -1,6 +1,6 @@
 package com.example.catalog.transfer.theatre;
 
-import com.example.catalog.enumeration.SeatType;
+import com.example.booking.enumeration.SeatType;
 import lombok.Getter;
 import lombok.Setter;
 

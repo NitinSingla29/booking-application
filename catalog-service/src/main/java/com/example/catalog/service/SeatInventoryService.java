@@ -1,12 +1,12 @@
 package com.example.catalog.service;
 
+import com.example.booking.enumeration.OperationStatus;
+import com.example.booking.enumeration.SeatReleaseStatus;
 import com.example.catalog.component.LockHandle;
 import com.example.catalog.component.LockManager;
 import com.example.catalog.domain.jpa.SeatInventoryEntry;
 import com.example.catalog.domain.jpa.Show;
-import com.example.catalog.enumeration.OperationStatus;
 import com.example.catalog.enumeration.SeatInventoryStatus;
-import com.example.catalog.enumeration.SeatReleaseStatus;
 import com.example.catalog.repository.jpa.ISeatInventoryEntryRepository;
 import com.example.catalog.repository.jpa.IShowRepository;
 import com.example.catalog.transfer.client.*;

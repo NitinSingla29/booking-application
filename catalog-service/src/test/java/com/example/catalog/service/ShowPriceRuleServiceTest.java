@@ -1,8 +1,8 @@
 package com.example.catalog.service;
 
 
+import com.example.booking.enumeration.SeatType;
 import com.example.catalog.BaseTest;
-import com.example.catalog.enumeration.SeatType;
 import com.example.catalog.transfer.show.price.ShowPriceRuleCreateRequest;
 import com.example.catalog.transfer.show.price.ShowPriceRuleCreateResponse;
 import com.example.catalog.transfer.show.price.ShowPriceRuleUpdateRequest;

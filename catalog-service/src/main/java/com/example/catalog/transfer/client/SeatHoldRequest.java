@@ -1,6 +1,6 @@
 package com.example.catalog.transfer.client;
 
-import com.example.catalog.enumeration.OperationStatus;
+import com.example.booking.enumeration.OperationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

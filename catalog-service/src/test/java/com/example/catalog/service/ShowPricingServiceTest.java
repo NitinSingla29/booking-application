@@ -1,10 +1,10 @@
 package com.example.catalog.service;
 
 
+import com.example.booking.enumeration.OperationStatus;
+import com.example.booking.enumeration.SeatType;
 import com.example.catalog.BaseTest;
 import com.example.catalog.domain.jpa.ShowPriceRule;
-import com.example.catalog.enumeration.OperationStatus;
-import com.example.catalog.enumeration.SeatType;
 import com.example.catalog.repository.jpa.IShowPriceRuleRepository;
 import com.example.catalog.transfer.show.price.ShowPriceCalculationRequest;
 import com.example.catalog.transfer.show.price.ShowPriceCalculationResponse;

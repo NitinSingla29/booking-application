@@ -1,8 +1,8 @@
 package com.example.config;
 
 import com.example.booking.client.InventoryClient;
-import com.example.booking.client.PaymentClient;
 import com.example.booking.client.PricingClient;
+import com.example.payment.client.PaymentClient;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;

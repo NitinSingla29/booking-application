@@ -1,9 +1,9 @@
 package com.example.catalog.service;
 
 
+import com.example.booking.enumeration.SeatType;
 import com.example.catalog.BaseTest;
 import com.example.catalog.domain.jpa.City;
-import com.example.catalog.enumeration.SeatType;
 import com.example.catalog.repository.jpa.ICityRepository;
 import com.example.catalog.transfer.theatre.ScreenSaveRequest;
 import com.example.catalog.transfer.theatre.SeatDefinitionSaveRequest;

@@ -1,7 +1,7 @@
-package com.example.booking.client;
+package com.example.payment.client;
 
-import com.example.booking.client.transfer.payment.PaymentRecordCreationRequest;
-import com.example.booking.client.transfer.payment.PaymentRecordCreationResponse;
+import com.example.payment.transfer.PaymentRecordCreationRequest;
+import com.example.payment.transfer.PaymentRecordCreationResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

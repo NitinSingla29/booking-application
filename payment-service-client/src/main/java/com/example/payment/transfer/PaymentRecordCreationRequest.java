@@ -1,4 +1,4 @@
-package com.example.booking.client.transfer.payment;
+package com.example.payment.transfer;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

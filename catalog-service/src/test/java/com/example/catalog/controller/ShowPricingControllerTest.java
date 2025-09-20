@@ -1,9 +1,9 @@
 package com.example.catalog.controller;
 
 
+import com.example.booking.enumeration.SeatType;
 import com.example.catalog.BaseTest;
 import com.example.catalog.domain.jpa.ShowPriceRule;
-import com.example.catalog.enumeration.SeatType;
 import com.example.catalog.repository.jpa.IShowPriceRuleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

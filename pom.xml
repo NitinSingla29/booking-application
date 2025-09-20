@@ -18,8 +18,8 @@
     <modules>
         <module>booking-service</module>
         <module>catalog-service</module>
-        <module>eventing-service</module>
-        <module>notification-service</module>
+        <module>payment-service-client</module>
+        <module>core-lib</module>
     </modules>
 
     <properties>
