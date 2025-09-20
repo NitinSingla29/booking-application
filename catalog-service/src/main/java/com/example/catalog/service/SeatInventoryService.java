@@ -1,7 +1,5 @@
 package com.example.catalog.service;
 
-import com.example.booking.enumeration.OperationStatus;
-import com.example.booking.enumeration.SeatReleaseStatus;
 import com.example.catalog.component.LockHandle;
 import com.example.catalog.component.LockManager;
 import com.example.catalog.domain.jpa.SeatInventoryEntry;
@@ -10,6 +8,8 @@ import com.example.catalog.enumeration.SeatInventoryStatus;
 import com.example.catalog.repository.jpa.ISeatInventoryEntryRepository;
 import com.example.catalog.repository.jpa.IShowRepository;
 import com.example.catalog.transfer.client.*;
+import com.example.core.enumeration.OperationStatus;
+import com.example.core.enumeration.SeatReleaseStatus;
 import jakarta.persistence.OptimisticLockException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

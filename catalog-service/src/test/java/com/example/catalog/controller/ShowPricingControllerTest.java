@@ -1,10 +1,10 @@
 package com.example.catalog.controller;
 
 
-import com.example.booking.enumeration.SeatType;
 import com.example.catalog.BaseTest;
 import com.example.catalog.domain.jpa.ShowPriceRule;
 import com.example.catalog.repository.jpa.IShowPriceRuleRepository;
+import com.example.core.enumeration.SeatType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

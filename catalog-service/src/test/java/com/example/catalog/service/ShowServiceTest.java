@@ -1,12 +1,12 @@
 package com.example.catalog.service;
 
-import com.example.booking.enumeration.SeatType;
 import com.example.catalog.BaseTest;
 import com.example.catalog.domain.jpa.*;
 import com.example.catalog.enumeration.SeatInventoryStatus;
 import com.example.catalog.enumeration.ShowStatus;
 import com.example.catalog.repository.jpa.*;
 import com.example.catalog.transfer.show.*;
+import com.example.core.enumeration.SeatType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

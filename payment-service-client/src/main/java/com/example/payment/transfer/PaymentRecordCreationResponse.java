@@ -1,23 +1,33 @@
 package com.example.payment.transfer;
 
-import com.example.booking.enumeration.OperationStatus;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import com.example.core.transfer.Response;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.Currency;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class PaymentRecordCreationResponse {
+public class PaymentRecordCreationResponse extends Response {
     private String userSystemCode;
     private String sourceObjectType;
     private String sourceObjectCode;
     private String systemCode;
     private BigDecimal amount;
     private Currency currency;
-    private OperationStatus status;
-    private String message;
+    private String gatewayRecordId;
+
+    public PaymentRecordCreationResponse(String userSystemCode, String sourceObjectType, String sourceObjectCode,
+                                         String systemCode, BigDecimal amount, Currency currency, String gatewayRecordId) {
+        this.userSystemCode = userSystemCode;
+        this.sourceObjectType = sourceObjectType;
+        this.sourceObjectCode = sourceObjectCode;
+        this.systemCode = systemCode;
+        this.amount = amount;
+        this.currency = currency;
+        this.gatewayRecordId = gatewayRecordId;
+    }
 }

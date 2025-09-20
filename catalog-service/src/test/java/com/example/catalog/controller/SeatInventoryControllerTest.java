@@ -1,6 +1,5 @@
 package com.example.catalog.controller;
 
-import com.example.booking.enumeration.SeatType;
 import com.example.catalog.BaseTest;
 import com.example.catalog.domain.jpa.*;
 import com.example.catalog.enumeration.SeatInventoryStatus;
@@ -9,6 +8,7 @@ import com.example.catalog.repository.jpa.*;
 import com.example.catalog.transfer.client.SeatConfirmRequest;
 import com.example.catalog.transfer.client.SeatHoldRequest;
 import com.example.catalog.transfer.client.SeatReleaseRequest;
+import com.example.core.enumeration.SeatType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -3,7 +3,7 @@ package com.example.catalog.repository.jpa;
 import com.example.catalog.domain.jpa.SeatInventoryEntry;
 import com.example.catalog.domain.jpa.Show;
 import com.example.catalog.enumeration.SeatInventoryStatus;
-import com.example.catalog.repository.jpa.base.IRelationEntityRepository;
+import com.example.core.repository.jpa.IRelationEntityRepository;
 
 import java.util.List;
 import java.util.Optional;

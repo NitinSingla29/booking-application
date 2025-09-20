@@ -1,6 +1,6 @@
 package com.example.catalog.domain.jpa;
 
-import com.example.catalog.domain.jpa.base.SystemCodedRelationEntity;
+import com.example.core.domain.jpa.SystemCodedRelationEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;

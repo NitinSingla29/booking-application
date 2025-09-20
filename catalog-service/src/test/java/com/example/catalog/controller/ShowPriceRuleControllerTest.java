@@ -1,13 +1,13 @@
 package com.example.catalog.controller;
 
 
-import com.example.booking.enumeration.OperationStatus;
-import com.example.booking.enumeration.SeatType;
 import com.example.catalog.BaseTest;
 import com.example.catalog.transfer.show.price.ShowPriceRuleCreateRequest;
 import com.example.catalog.transfer.show.price.ShowPriceRuleCreateResponse;
 import com.example.catalog.transfer.show.price.ShowPriceRuleUpdateRequest;
 import com.example.catalog.transfer.show.price.ShowPriceRuleUpdateResponse;
+import com.example.core.enumeration.OperationStatus;
+import com.example.core.enumeration.SeatType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

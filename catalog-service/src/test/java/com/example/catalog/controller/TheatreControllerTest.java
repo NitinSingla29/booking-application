@@ -1,13 +1,13 @@
 package com.example.catalog.controller;
 
 
-import com.example.booking.enumeration.SeatType;
 import com.example.catalog.BaseTest;
 import com.example.catalog.domain.jpa.City;
 import com.example.catalog.repository.jpa.ICityRepository;
 import com.example.catalog.transfer.theatre.ScreenSaveRequest;
 import com.example.catalog.transfer.theatre.SeatDefinitionSaveRequest;
 import com.example.catalog.transfer.theatre.TheatreSaveRequest;
+import com.example.core.enumeration.SeatType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

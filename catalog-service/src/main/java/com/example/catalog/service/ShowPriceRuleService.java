@@ -1,9 +1,9 @@
 package com.example.catalog.service;
 
-import com.example.booking.enumeration.OperationStatus;
 import com.example.catalog.domain.jpa.ShowPriceRule;
 import com.example.catalog.repository.jpa.IShowPriceRuleRepository;
 import com.example.catalog.transfer.show.price.*;
+import com.example.core.enumeration.OperationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

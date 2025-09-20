@@ -1,13 +1,13 @@
 package com.example.catalog.service;
 
 
-import com.example.booking.enumeration.OperationStatus;
-import com.example.booking.enumeration.SeatType;
 import com.example.catalog.BaseTest;
 import com.example.catalog.domain.jpa.ShowPriceRule;
 import com.example.catalog.repository.jpa.IShowPriceRuleRepository;
 import com.example.catalog.transfer.show.price.ShowPriceCalculationRequest;
 import com.example.catalog.transfer.show.price.ShowPriceCalculationResponse;
+import com.example.core.enumeration.OperationStatus;
+import com.example.core.enumeration.SeatType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

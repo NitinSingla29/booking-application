@@ -1,7 +1,7 @@
 package com.example.catalog.domain.jpa;
 
-import com.example.catalog.domain.jpa.base.SystemCodedRelationEntity;
 import com.example.catalog.enumeration.SeatInventoryStatus;
+import com.example.core.domain.jpa.SystemCodedRelationEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

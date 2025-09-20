@@ -1,8 +1,8 @@
 package com.example.catalog.repository.jpa;
 
-import com.example.booking.enumeration.SeatType;
 import com.example.catalog.domain.jpa.ShowPriceRule;
-import com.example.catalog.repository.jpa.base.IRelationEntityRepository;
+import com.example.core.enumeration.SeatType;
+import com.example.core.repository.jpa.IRelationEntityRepository;
 
 import java.util.Optional;
 
