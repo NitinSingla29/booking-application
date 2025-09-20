@@ -20,7 +20,6 @@ import com.example.booking.transfer.BookingRequest;
 import com.example.booking.transfer.BookingResponse;
 import com.example.booking.transfer.CompletePaymentRequest;
 import com.example.booking.transfer.PaymentDetails;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -29,7 +28,8 @@ import java.util.Currency;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
 class BookingServiceTest extends BaseTest {
 
@@ -38,18 +38,13 @@ class BookingServiceTest extends BaseTest {
 
     @Autowired
     private BookingService bookingService;
-
+    @Autowired
     private InventoryClient inventoryClient;
+    @Autowired
     private PricingClient pricingClient;
+    @Autowired
     private PaymentClient paymentClient;
 
-    @BeforeEach
-    void setup() {
-        inventoryClient = mock(InventoryClient.class);
-        pricingClient = mock(PricingClient.class);
-        paymentClient = mock(PaymentClient.class);
-        bookingService = new BookingService(bookingRepository, inventoryClient, pricingClient, paymentClient);
-    }
 
     @Test
     void testStartBooking_successfulFlow() {

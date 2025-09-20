@@ -26,6 +26,7 @@ public class BookingResponse {
         response.setShowSystemCode(showCode);
         response.setSeatCodes(seatCodes);
         response.setPaymentInfo(paymentInfo);
+        response.setBookingStatus(bookingStatus);
         response.setStatus(OperationStatus.SUCCESS);
         return response;
     }

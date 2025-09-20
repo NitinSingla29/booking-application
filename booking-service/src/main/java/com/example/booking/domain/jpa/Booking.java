@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
@@ -20,17 +19,8 @@ public class Booking extends SystemCodedRelationEntity {
     @Column(name = "user_system_code", nullable = false)
     private String userSystemCode;
 
-    @Column(name = "theatre_system_code", nullable = false)
-    private String theatreSystemCode;
-
-    @Column(name = "movie_system_code", nullable = false)
-    String movieSystemCode;
-
     @Column(name = "show_system_code", nullable = false)
     private String showSystemCode;
-
-    @Column(name = "show_date", nullable = false)
-    private LocalDate showDate;
 
     @ElementCollection
     private List<String> seatCodes = new ArrayList<>();
@@ -56,7 +46,7 @@ public class Booking extends SystemCodedRelationEntity {
     public Booking(String userSystemCode, String showSystemCode, List<String> seatCodes, BookingStatus status) {
         this.userSystemCode = userSystemCode;
         this.showSystemCode = showSystemCode;
-        this.seatCodes = seatCodes;
+        this.seatCodes = new ArrayList<>(seatCodes);
         this.status = status;
     }
 }
