@@ -26,4 +26,8 @@ public abstract class Response {
         this.status = OperationStatus.FAILURE;
         this.message = "Operation Failed";
     }
+
+    public boolean isSuccess() {
+        return this.getStatus() == OperationStatus.SUCCESS;
+    }
 }
