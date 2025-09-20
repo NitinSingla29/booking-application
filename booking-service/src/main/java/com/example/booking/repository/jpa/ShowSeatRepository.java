@@ -1,4 +1,4 @@
-package com.example.booking.repository;
+package com.example.booking.repository.jpa;
 
 import com.example.booking.entity.ShowSeat;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,63 +1,158 @@
 package com.example.booking.service;
 
-import com.example.booking.dto.BookingRequest;
-import com.example.booking.dto.BookingResponse;
-import com.example.booking.entity.ShowSeat;
-import com.example.booking.repository.ShowSeatRepository;
+
+import com.example.booking.BaseTest;
+import com.example.booking.BookingStatus;
+import com.example.booking.client.InventoryClient;
+import com.example.booking.client.PaymentClient;
+import com.example.booking.client.PricingClient;
+import com.example.booking.client.transfer.inventory.SeatConfirmResponse;
+import com.example.booking.client.transfer.inventory.SeatHoldResponse;
+import com.example.booking.client.transfer.inventory.SeatReleaseResponse;
+import com.example.booking.client.transfer.payment.PaymentRecordCreationResponse;
+import com.example.booking.client.transfer.pricing.ShowPriceCalculationResponse;
+import com.example.booking.domain.jpa.Booking;
+import com.example.booking.enumeration.OperationStatus;
+import com.example.booking.enumeration.PaymentStatus;
+import com.example.booking.enumeration.SeatReleaseStatus;
+import com.example.booking.repository.jpa.IBookingRepository;
+import com.example.booking.transfer.BookingRequest;
+import com.example.booking.transfer.BookingResponse;
+import com.example.booking.transfer.CompletePaymentRequest;
+import com.example.booking.transfer.PaymentDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.redisson.api.RLock;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
+import java.util.Currency;
 import java.util.List;
-import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class BookingServiceTest {
+class BookingServiceTest extends BaseTest {
 
-    ShowSeatRepository seatRepository = Mockito.mock(ShowSeatRepository.class);
-    RedisLockService lockService = Mockito.mock(RedisLockService.class);
-    KafkaTemplate<String,String> kafkaTemplate = Mockito.mock(KafkaTemplate.class);
+    @Autowired
+    private IBookingRepository bookingRepository;
 
-    BookingService bookingService;
+    @Autowired
+    private BookingService bookingService;
+
+    private InventoryClient inventoryClient;
+    private PricingClient pricingClient;
+    private PaymentClient paymentClient;
 
     @BeforeEach
     void setup() {
-        bookingService = new BookingService(seatRepository, lockService, kafkaTemplate);
+        inventoryClient = mock(InventoryClient.class);
+        pricingClient = mock(PricingClient.class);
+        paymentClient = mock(PaymentClient.class);
+        bookingService = new BookingService(bookingRepository, inventoryClient, pricingClient, paymentClient);
     }
 
     @Test
-    void successfulBooking() throws InterruptedException {
-        BookingRequest req = new BookingRequest();
-        req.setShowId(UUID.randomUUID());
-        req.setSeatNumbers(List.of("A1","A2"));
-        ShowSeat s1 = new ShowSeat(UUID.randomUUID(), req.getShowId(), "A1", ShowSeat.Status.AVAILABLE, 0L);
-        ShowSeat s2 = new ShowSeat(UUID.randomUUID(), req.getShowId(), "A2", ShowSeat.Status.AVAILABLE, 0L);
+    void testStartBooking_successfulFlow() {
+        BookingRequest request = new BookingRequest("user1", "show1", List.of("A1", "A2"));
 
-        when(lockService.acquireMultiLock(any(), anyLong(), anyLong())).thenReturn(Mockito.mock(RLock.class));
-        when(seatRepository.findByShowIdAndSeatNumberIn(eq(req.getShowId()), any())).thenReturn(List.of(s1,s2));
-        when(kafkaTemplate.send(anyString(), anyString())).thenReturn(null);
+        // Mock inventory client holdSeats
+        SeatHoldResponse seatHoldResponse = new SeatHoldResponse();
+        seatHoldResponse.setStatus(OperationStatus.SUCCESS);
+        seatHoldResponse.setSeatType(null);
+        when(inventoryClient.holdSeats(any())).thenReturn(seatHoldResponse);
 
-        BookingResponse resp = bookingService.bookSeats(req);
-        assertThat(resp.isSuccess()).isTrue();
-        verify(seatRepository, times(1)).saveAll(any());
+        // Mock pricing client
+        ShowPriceCalculationResponse pricingResponse = new ShowPriceCalculationResponse();
+        pricingResponse.setPrice(BigDecimal.valueOf(500));
+        pricingResponse.setCurrency(Currency.getInstance("INR"));
+        when(pricingClient.calculatePrice(any())).thenReturn(pricingResponse);
+
+        // Mock payment client
+        PaymentRecordCreationResponse paymentResponse = new PaymentRecordCreationResponse();
+        paymentResponse.setStatus(OperationStatus.SUCCESS);
+        paymentResponse.setSystemCode("pay123");
+        when(paymentClient.createPaymentRecord(any())).thenReturn(paymentResponse);
+
+        BookingResponse response = bookingService.startBooking(request);
+
+        assertTrue(response.isSuccess());
+        assertEquals(BookingStatus.PAYMENT_PENDING, response.getBookingStatus());
+        assertNotNull(response.getPaymentInfo());
+        assertEquals(BigDecimal.valueOf(500), response.getPaymentInfo().getAmount());
     }
 
     @Test
-    void seatUnavailable() throws InterruptedException {
-        BookingRequest req = new BookingRequest();
-        req.setShowId(UUID.randomUUID());
-        req.setSeatNumbers(List.of("A1"));
-        ShowSeat s1 = new ShowSeat(UUID.randomUUID(), req.getShowId(), "A1", ShowSeat.Status.BOOKED, 0L);
+    void testStartBooking_seatHoldFails() {
+        BookingRequest request = new BookingRequest("user1", "show1", List.of("A1", "A2"));
 
-        when(lockService.acquireMultiLock(any(), anyLong(), anyLong())).thenReturn(Mockito.mock(RLock.class));
-        when(seatRepository.findByShowIdAndSeatNumberIn(eq(req.getShowId()), any())).thenReturn(List.of(s1));
+        when(inventoryClient.holdSeats(any())).thenReturn(null);
 
-        BookingResponse resp = bookingService.bookSeats(req);
-        assertThat(resp.isSuccess()).isFalse();
-        assertThat(resp.getMessage()).contains("not available");
+        BookingResponse response = bookingService.startBooking(request);
+        assertFalse(response.isSuccess());
+        assertEquals("Seat hold service unavailable", response.getMessage());
     }
+
+    @Test
+    void testCompletePayment_successfulFlow() {
+        Booking booking = new Booking("user1", "show1", List.of("A1", "A2"), BookingStatus.PAYMENT_PENDING);
+        booking.setAmount(BigDecimal.valueOf(500));
+        bookingRepository.save(booking);
+
+        CompletePaymentRequest request = new CompletePaymentRequest(
+                booking.getSystemCode(),
+                new PaymentDetails("pay123", BigDecimal.valueOf(500), PaymentStatus.SUCCESS)
+        );
+
+        SeatConfirmResponse confirmResponse = new SeatConfirmResponse();
+        confirmResponse.setStatus(OperationStatus.SUCCESS);
+        when(inventoryClient.confirmSeats(any())).thenReturn(confirmResponse);
+
+        BookingResponse response = bookingService.completePayment(request);
+
+        assertTrue(response.isSuccess());
+        assertEquals(BookingStatus.CONFIRMED.name(), bookingRepository.findBySystemCode(booking.getSystemCode()).get().getStatus().name());
+    }
+
+    @Test
+    void testCompletePayment_paymentFailed() {
+        Booking booking = new Booking("user1", "show1", List.of("A1", "A2"), BookingStatus.PAYMENT_PENDING);
+        booking.setAmount(BigDecimal.valueOf(500));
+        bookingRepository.save(booking);
+
+        CompletePaymentRequest request = new CompletePaymentRequest(
+                booking.getSystemCode(),
+                new PaymentDetails("pay123", BigDecimal.valueOf(500), PaymentStatus.FAILED)
+        );
+
+        SeatReleaseResponse releaseResponse = new SeatReleaseResponse();
+        releaseResponse.setStatus(SeatReleaseStatus.SUCCESS);
+        when(inventoryClient.releaseSeats(any())).thenReturn(releaseResponse);
+
+        BookingResponse response = bookingService.completePayment(request);
+
+        assertFalse(response.isSuccess());
+        assertEquals(BookingStatus.PAYMENT_FAILED, bookingRepository.findBySystemCode(booking.getSystemCode()).get().getStatus());
+    }
+
+    @Test
+    void testCompletePayment_seatConfirmationFails() {
+        Booking booking = new Booking("user1", "show1", List.of("A1", "A2"), BookingStatus.PAYMENT_PENDING);
+        booking.setAmount(BigDecimal.valueOf(500));
+        bookingRepository.save(booking);
+
+        CompletePaymentRequest request = new CompletePaymentRequest(
+                booking.getSystemCode(),
+                new PaymentDetails("pay123", BigDecimal.valueOf(500), PaymentStatus.SUCCESS)
+        );
+
+        SeatConfirmResponse confirmResponse = new SeatConfirmResponse();
+        confirmResponse.setStatus(OperationStatus.FAILURE);
+        when(inventoryClient.confirmSeats(any())).thenReturn(confirmResponse);
+
+        BookingResponse response = bookingService.completePayment(request);
+
+        assertFalse(response.isSuccess());
+        assertEquals(BookingStatus.SEAT_CONFIRMATION_FAILED, bookingRepository.findBySystemCode(booking.getSystemCode()).get().getStatus());
+    }
+
+}

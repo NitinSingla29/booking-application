@@ -1,15 +1,15 @@
 package com.example.booking.controller;
 
-import com.example.booking.dto.BookingRequest;
-import com.example.booking.dto.BookingResponse;
 import com.example.booking.service.BookingService;
+import com.example.booking.transfer.BookingRequest;
+import com.example.booking.transfer.BookingResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/bookings")
+@RequestMapping("/bookings")
 public class BookingController {
 
     private final BookingService bookingService;
@@ -20,7 +20,7 @@ public class BookingController {
 
     @PostMapping
     public ResponseEntity<BookingResponse> book(@RequestBody BookingRequest request) {
-        BookingResponse resp = bookingService.bookSeats(request);
+        BookingResponse resp = bookingService.startBooking(request);
         return ResponseEntity.ok(resp);
     }
 
