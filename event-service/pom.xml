@@ -7,10 +7,10 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>notification-service</artifactId>
+    <artifactId>event-service</artifactId>
     <packaging>jar</packaging>
 
-    <name>notification-service</name>
+    <name>event-service</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -19,22 +19,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.example.booking</groupId>
             <artifactId>core-lib</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.example.booking</groupId>
-            <artifactId>event-service</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
         </dependency>
     </dependencies>
 </project>

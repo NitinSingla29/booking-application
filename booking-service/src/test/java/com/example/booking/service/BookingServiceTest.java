@@ -2,7 +2,6 @@ package com.example.booking.service;
 
 
 import com.example.booking.BaseTest;
-import com.example.booking.BookingStatus;
 import com.example.booking.client.InventoryClient;
 import com.example.booking.client.PricingClient;
 import com.example.booking.client.transfer.inventory.SeatConfirmResponse;
@@ -15,6 +14,7 @@ import com.example.booking.transfer.BookingRequest;
 import com.example.booking.transfer.BookingResponse;
 import com.example.booking.transfer.CompletePaymentRequest;
 import com.example.booking.transfer.PaymentDetails;
+import com.example.core.enumeration.BookingStatus;
 import com.example.core.enumeration.OperationStatus;
 import com.example.core.enumeration.PaymentStatus;
 import com.example.core.enumeration.SeatReleaseStatus;

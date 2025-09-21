@@ -43,7 +43,7 @@ class NotificationServiceTest {
     @Test
     void sendNotification_success() {
         NotificationRequest request = new NotificationRequest();
-        request.setUserId("user1");
+        request.setUserSystemCode("user1");
         request.setType(NotificationType.PAYMENT_RECEIVED);
         request.setContent("Payment received message");
 
@@ -68,8 +68,8 @@ class NotificationServiceTest {
     @Test
     void sendNotification_noConfig() {
         NotificationRequest request = new NotificationRequest();
-        request.setUserId("user2");
-        request.setType(NotificationType.BOOKING_CREATED);
+        request.setUserSystemCode("user2");
+        request.setType(NotificationType.BOOKING_CONFIRMER);
         request.setContent("Booking created message");
 
         when(configRepository.findByUserId("user2")).thenReturn(Optional.empty());
@@ -83,12 +83,12 @@ class NotificationServiceTest {
     @Test
     void sendNotification_noChannelsConfigured() {
         NotificationRequest request = new NotificationRequest();
-        request.setUserId("user3");
-        request.setType(NotificationType.BOOKING_CREATED);
+        request.setUserSystemCode("user3");
+        request.setType(NotificationType.BOOKING_CONFIRMER);
         request.setContent("Booking created message");
 
         Map<NotificationType, Set<Channel>> prefs = new HashMap<>();
-        prefs.put(NotificationType.BOOKING_CREATED, Collections.emptySet());
+        prefs.put(NotificationType.BOOKING_CONFIRMER, Collections.emptySet());
 
         UserNotificationConfig config = new UserNotificationConfig();
         config.setUserId("user3");
@@ -106,7 +106,7 @@ class NotificationServiceTest {
     @Test
     void sendNotification_partialFailure() {
         NotificationRequest request = new NotificationRequest();
-        request.setUserId("user4");
+        request.setUserSystemCode("user4");
         request.setType(NotificationType.PAYMENT_RECEIVED);
         request.setContent("Payment received message");
 

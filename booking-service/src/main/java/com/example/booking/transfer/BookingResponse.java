@@ -1,6 +1,6 @@
 package com.example.booking.transfer;
 
-import com.example.booking.BookingStatus;
+import com.example.core.enumeration.BookingStatus;
 import com.example.core.enumeration.OperationStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

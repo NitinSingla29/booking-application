@@ -1,6 +1,5 @@
 package com.example.booking.service;
 
-import com.example.booking.BookingStatus;
 import com.example.booking.client.InventoryClient;
 import com.example.booking.client.PricingClient;
 import com.example.booking.client.transfer.inventory.*;
@@ -9,9 +8,12 @@ import com.example.booking.client.transfer.pricing.ShowPriceCalculationResponse;
 import com.example.booking.domain.jpa.Booking;
 import com.example.booking.repository.jpa.IBookingRepository;
 import com.example.booking.transfer.*;
+import com.example.core.enumeration.BookingStatus;
 import com.example.core.enumeration.OperationStatus;
 import com.example.core.enumeration.PaymentStatus;
 import com.example.core.enumeration.SeatReleaseStatus;
+import com.example.eventing.event.BookingConfirmedEvent;
+import com.example.eventing.event.producer.BookingEventProducer;
 import com.example.payment.client.PaymentClient;
 import com.example.payment.transfer.PaymentRecordCreationRequest;
 import com.example.payment.transfer.PaymentRecordCreationResponse;
@@ -29,6 +31,7 @@ public class BookingService {
     private final InventoryClient inventoryClient;
     private final PricingClient pricingClient;
     private final PaymentClient paymentClient;
+    private final BookingEventProducer bookingEventProducer;
 
     /**
      * Step 1: Start booking by holding seats, calculating price, and creating payment record
@@ -95,12 +98,18 @@ public class BookingService {
 
         //  Booking confirmed
         updateBookingStatus(booking, BookingStatus.CONFIRMED, paymentDetails.getPaymentRecordId());
+
+        // 🔔 Publish booking confirmed event. Ideally Outbox pattern should be used here.
+        sendBookingConfirmationEvent(booking);
+
         return BookingResponse.success(booking.getSystemCode(), booking.getShowSystemCode(), booking.getSeatCodes(), booking.getStatus(), null);
     }
 
+    private void sendBookingConfirmationEvent(Booking booking) {
+        BookingConfirmedEvent event = new BookingConfirmedEvent(booking.getSystemCode(), booking.getUserSystemCode(), booking.getShowSystemCode());
+        bookingEventProducer.publishBookingConfirmed(event);
+    }
 
-
-    /* ==================== Private Helper Methods ==================== */
 
     private void releaseSeats(Booking booking) {
         try {

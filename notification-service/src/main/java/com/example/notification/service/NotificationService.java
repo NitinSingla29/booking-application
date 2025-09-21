@@ -18,7 +18,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
-public class NotificationService {
+public class NotificationService implements INotificationService {
 
 
     private final NotificationRepository notificationRepository;
@@ -27,7 +27,7 @@ public class NotificationService {
 
 
     public NotificationResponse sendNotification(NotificationRequest request) {
-        UserNotificationConfig config = configRepository.findByUserId(request.getUserId())
+        UserNotificationConfig config = configRepository.findByUserId(request.getUserSystemCode())
                 .orElseThrow(() -> new RuntimeException("No config for user"));
 
         NotificationResponse notificationResponse = new NotificationResponse();
@@ -41,7 +41,7 @@ public class NotificationService {
         boolean overallSuccess = true;
         for (Channel channel : channels) {
             Notification notification = Notification.builder()
-                    .userId(request.getUserId())
+                    .userId(request.getUserSystemCode())
                     .type(request.getType())
                     .channel(channel)
                     .content(request.getContent())
