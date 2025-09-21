@@ -69,7 +69,7 @@ class NotificationServiceTest {
     void sendNotification_noConfig() {
         NotificationRequest request = new NotificationRequest();
         request.setUserSystemCode("user2");
-        request.setType(NotificationType.BOOKING_CONFIRMER);
+        request.setType(NotificationType.BOOKING_CONFIRMED);
         request.setContent("Booking created message");
 
         when(configRepository.findByUserId("user2")).thenReturn(Optional.empty());
@@ -84,11 +84,11 @@ class NotificationServiceTest {
     void sendNotification_noChannelsConfigured() {
         NotificationRequest request = new NotificationRequest();
         request.setUserSystemCode("user3");
-        request.setType(NotificationType.BOOKING_CONFIRMER);
+        request.setType(NotificationType.BOOKING_CONFIRMED);
         request.setContent("Booking created message");
 
         Map<NotificationType, Set<Channel>> prefs = new HashMap<>();
-        prefs.put(NotificationType.BOOKING_CONFIRMER, Collections.emptySet());
+        prefs.put(NotificationType.BOOKING_CONFIRMED, Collections.emptySet());
 
         UserNotificationConfig config = new UserNotificationConfig();
         config.setUserId("user3");

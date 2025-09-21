@@ -22,7 +22,7 @@
         <module>core-lib</module>
         <module>payment-service</module>
         <module>notification-service</module>
-        <module>event-service</module>
+        <module>event-lib</module>
         <module>common-lib</module>
     </modules>
 

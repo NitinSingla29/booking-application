@@ -36,7 +36,7 @@ class BookingEventConsumerTest {
 
         NotificationRequest request = captor.getValue();
         assertThat(request.getUserSystemCode()).isEqualTo("USER123");
-        assertThat(request.getType()).isEqualTo(NotificationType.BOOKING_CONFIRMER);
+        assertThat(request.getType()).isEqualTo(NotificationType.BOOKING_CONFIRMED);
         assertThat(request.getContent()).isEqualTo("Your booking BOOK123 is confirmed!");
     }
 }

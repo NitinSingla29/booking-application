@@ -37,7 +37,7 @@
         </dependency>
         <dependency>
             <groupId>com.example.booking</groupId>
-            <artifactId>event-service</artifactId>
+            <artifactId>event-lib</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>

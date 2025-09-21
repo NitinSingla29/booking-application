@@ -22,7 +22,7 @@ public class BookingEventConsumer {
         LOGGER.info("Received booking confirmed event: {}", event);
 
         String content = "Your booking " + event.getBookingSystemCode() + " is confirmed!";
-        NotificationRequest request = new NotificationRequest(event.getUserSystemCode(), NotificationType.BOOKING_CONFIRMER, content);
+        NotificationRequest request = new NotificationRequest(event.getUserSystemCode(), NotificationType.BOOKING_CONFIRMED, content);
 
         notificationService.sendNotification(request);
     }

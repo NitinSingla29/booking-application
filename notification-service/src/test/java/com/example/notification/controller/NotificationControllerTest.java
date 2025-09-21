@@ -35,7 +35,7 @@ class NotificationControllerTest {
         Mockito.when(notificationService.sendNotification(any(NotificationRequest.class)))
                 .thenReturn(response);
 
-        String requestJson = "{ \"userId\": \"user1\", \"type\": \"PAYMENT_RECEIVED\", \"content\": \"Payment received\" }";
+        String requestJson = "{ \"userSystemCode\": \"user1\", \"type\": \"PAYMENT_RECEIVED\", \"content\": \"Payment received\" }";
 
         mockMvc.perform(post("/notifications")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -52,7 +52,7 @@ class NotificationControllerTest {
         Mockito.when(notificationService.sendNotification(any(NotificationRequest.class)))
                 .thenReturn(response);
 
-        String requestJson = "{ \"userId\": \"user2\", \"type\": \"BOOKING_CREATED\", \"content\": \"Booking created\" }";
+        String requestJson = "{ \"userSystemCode\": \"user2\", \"type\": \"BOOKING_CONFIRMED\", \"content\": \"Booking created\" }";
 
         mockMvc.perform(post("/notifications")
                         .contentType(MediaType.APPLICATION_JSON)
