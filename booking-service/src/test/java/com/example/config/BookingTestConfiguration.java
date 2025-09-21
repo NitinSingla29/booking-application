@@ -2,6 +2,7 @@ package com.example.config;
 
 import com.example.booking.client.InventoryClient;
 import com.example.booking.client.PricingClient;
+import com.example.eventing.event.producer.BookingEventProducer;
 import com.example.payment.client.PaymentClient;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -23,4 +24,10 @@ public class BookingTestConfiguration {
     public PricingClient pricingClient() {
         return Mockito.mock(PricingClient.class);
     }
+
+    @Bean
+    public BookingEventProducer bookingEventProducer() {
+        return Mockito.mock(BookingEventProducer.class);
+    }
+
 }
