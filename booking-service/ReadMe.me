@@ -1,0 +1,10 @@
+# How to build and run this Spring Boot application with Docker
+
+## Build the application JAR
+mvn clean package
+
+## Build the Docker image
+docker build -t booking-service .
+
+## Run the Docker container
+docker run --network="host" -p 8080:8080 booking-service
