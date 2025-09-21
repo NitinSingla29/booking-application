@@ -1,6 +1,6 @@
 package com.example.payment.transfer;
 
-import com.example.core.transfer.Response;
+import com.example.common.transfer.Response;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

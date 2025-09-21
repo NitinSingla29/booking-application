@@ -1,7 +1,7 @@
 package com.example.catalog.transfer.show.price;
 
-import com.example.core.enumeration.OperationStatus;
-import com.example.core.enumeration.SeatType;
+import com.example.common.enumeration.OperationStatus;
+import com.example.common.enumeration.SeatType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

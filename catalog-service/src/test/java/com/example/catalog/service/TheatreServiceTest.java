@@ -8,7 +8,7 @@ import com.example.catalog.transfer.theatre.ScreenSaveRequest;
 import com.example.catalog.transfer.theatre.SeatDefinitionSaveRequest;
 import com.example.catalog.transfer.theatre.TheatreResponse;
 import com.example.catalog.transfer.theatre.TheatreSaveRequest;
-import com.example.core.enumeration.SeatType;
+import com.example.common.enumeration.SeatType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

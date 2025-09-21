@@ -1,6 +1,6 @@
 package com.example.catalog.transfer.show.price;
 
-import com.example.core.enumeration.OperationStatus;
+import com.example.common.enumeration.OperationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,7 +1,7 @@
 package com.example.booking.client.transfer.inventory;
 
-import com.example.core.enumeration.OperationStatus;
-import com.example.core.enumeration.SeatType;
+import com.example.common.enumeration.OperationStatus;
+import com.example.common.enumeration.SeatType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

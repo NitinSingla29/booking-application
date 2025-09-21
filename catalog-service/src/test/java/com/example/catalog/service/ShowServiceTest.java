@@ -6,7 +6,7 @@ import com.example.catalog.enumeration.SeatInventoryStatus;
 import com.example.catalog.enumeration.ShowStatus;
 import com.example.catalog.repository.jpa.*;
 import com.example.catalog.transfer.show.*;
-import com.example.core.enumeration.SeatType;
+import com.example.common.enumeration.SeatType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

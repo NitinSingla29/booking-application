@@ -1,7 +1,7 @@
 package com.example.booking.domain.jpa;
 
+import com.example.common.enumeration.BookingStatus;
 import com.example.core.domain.jpa.SystemCodedRelationEntity;
-import com.example.core.enumeration.BookingStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

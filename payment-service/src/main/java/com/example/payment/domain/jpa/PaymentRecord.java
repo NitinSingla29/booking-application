@@ -1,7 +1,7 @@
 package com.example.payment.domain.jpa;
 
+import com.example.common.enumeration.PaymentStatus;
 import com.example.core.domain.jpa.SystemCodedRelationEntity;
-import com.example.core.enumeration.PaymentStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;

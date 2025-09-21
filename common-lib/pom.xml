@@ -7,10 +7,10 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>event-service</artifactId>
+    <artifactId>common-lib</artifactId>
     <packaging>jar</packaging>
 
-    <name>event-service</name>
+    <name>common-lib</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -19,13 +19,10 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.example.booking</groupId>
-            <artifactId>common-lib</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka</artifactId>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

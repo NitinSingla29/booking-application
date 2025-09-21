@@ -1,6 +1,6 @@
 package com.example.payment.service;
 
-import com.example.core.enumeration.PaymentStatus;
+import com.example.common.enumeration.PaymentStatus;
 import com.example.payment.BaseTest;
 import com.example.payment.domain.jpa.PaymentRecord;
 import com.example.payment.repository.jpa.IPaymentRecordRepository;

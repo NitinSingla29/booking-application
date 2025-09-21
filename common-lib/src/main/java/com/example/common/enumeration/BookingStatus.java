@@ -1,4 +1,4 @@
-package com.example.core.enumeration;
+package com.example.common.enumeration;
 
 public enum BookingStatus {
     INITIATED,

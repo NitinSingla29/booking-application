@@ -1,7 +1,7 @@
 package com.example.notification.transfer;
 
-import com.example.core.enumeration.OperationStatus;
-import com.example.core.transfer.Response;
+import com.example.common.enumeration.OperationStatus;
+import com.example.common.transfer.Response;
 
 
 public class NotificationResponse extends Response {
