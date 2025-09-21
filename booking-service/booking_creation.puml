@@ -1,0 +1,29 @@
+@startuml
+== Step 1: Seat Hold + Payment Record Creation ==
+
+actor User
+participant "Booking Service" as BS
+participant "SeatInventory" as SI
+participant "ShowPriceRule" as PR
+participant "Catalog Service" as CS
+participant "Payment Service" as PS
+
+User -> BS : Request to book seats
+BS -> CS : Check seat availability
+CS -> SI : Fetch seat availability
+SI --> CS : Available / Booked
+CS -> PR : Get price for seats
+PR --> CS : Price details
+CS --> BS : Availability + Price
+alt Seats available
+    BS -> CS : Hold seats
+    CS -> SI : Update seat status to HOLD
+    SI --> CS : Seats held
+    CS --> BS : Seats held confirmation
+    BS -> PS : Create payment record
+    PS --> BS : Payment record created
+    BS --> User : Return booking initiation info
+else Seats not available
+    BS --> User : Return booking failed
+end
+@enduml

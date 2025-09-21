@@ -1,0 +1,40 @@
+@startuml
+== Step 2: Payment Confirmation & Finalize Booking ==
+
+actor User
+participant "Booking Service" as BS
+participant "Payment Service" as PS
+participant "Catalog Service" as CS
+participant "SeatInventory" as SI
+participant "Notification Service" as NS
+
+User -> PS : Make payment via gateway
+PS -> BS : Notify payment status (SUCCESS/FAILED)
+
+alt Payment SUCCESS
+    BS -> CS : Confirm seats (HOLD → CONFIRM)
+    CS -> SI : Update seat status to CONFIRM
+    SI --> CS : Seats confirmed
+    CS --> BS : Seats confirmed
+
+    BS -> NS : Send booking confirmation notification
+    NS --> User : Email / WhatsApp / SMS confirmation
+else Payment FAILED
+    BS -> CS : Release seats (HOLD → AVAILABLE)
+    CS -> SI : Update seat status to AVAILABLE
+    SI --> CS : Seats released
+    CS --> BS : Seats released
+
+    BS -> NS : Send booking failure notification
+    NS --> User : Email / WhatsApp / SMS failure
+end
+
+alt Payment timeout (TTL expired)
+    BS -> CS : Release seats automatically
+    CS -> SI : Update seat status to AVAILABLE
+    SI --> CS : Seats released
+    CS --> BS : Seats released
+    BS -> NS : Notify user about timeout / booking cancelled
+    NS --> User : Notification
+end
+@enduml
