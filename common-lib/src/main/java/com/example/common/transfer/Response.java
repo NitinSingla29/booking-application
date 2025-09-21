@@ -28,6 +28,6 @@ public abstract class Response {
     }
 
     public boolean isSuccess() {
-        return this.getStatus() == OperationStatus.SUCCESS;
+        return this.status == OperationStatus.SUCCESS;
     }
 }
